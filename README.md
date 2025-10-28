@@ -1,2 +1,2 @@
-# My course at 19
-2025-2026
+# My course at 42
+2025-2026 - Bruxelles
