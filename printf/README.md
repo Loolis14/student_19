@@ -1,2 +1,4 @@
-# My course at 42
-2025-2026 - Bruxelles
+# printf
+the function (should) follows the behavior of printf in the C standard.
+
+No tests yet
