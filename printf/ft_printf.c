@@ -6,7 +6,7 @@
 /*   By: mmeurer <mmeurer@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/29 10:34:44 by mmeurer           #+#    #+#             */
-/*   Updated: 2025/10/29 23:08:23 by mmeurer          ###   ########.fr       */
+/*   Updated: 2025/10/30 18:20:07 by mmeurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,11 +69,18 @@ int	ft_printf(const char *format, ...)
 /* #include <stdio.h>
 int main()
 {
-	char s[] = "printf est égal %% il est %d";
-	//char s2[] = "printf est %s";
-	//char p[] = "shrek";
-	//ft_printf(s, 14, "shrek");
-	//printf("%p\n", 14);
-	printf(" %i\n", ft_printf(s, 2));
-	printf(" %i\n", printf(s, 2));
+	//one of each
+	char s[] = "Le %% de chance es%c de %d ou %i ou %u, en hexadecimal %x ou %X";
+	printf(" %i\n", ft_printf(s, 't', 10, 50, 70, 80, 100));
+	printf(" %i\n", printf(s, 't', 10, 50, 70, 80, 100));
+
+	//pointeur
+	char s2[] = "l'adresse du %s s2 est %p";
+	printf(" %i\n", ft_printf(s2, "pointeur", s2));
+	printf(" %i\n", printf(s2,"pointeur", s2));
+
+	//particulary cases
+	char s3[] = "Si un string est vide : %s, et pour les nombres négatifs : %d, %i, (unsigned) %u, (hexadécimal) %x, %X";
+	printf(" %i\n", ft_printf(s3, "", -2, -56, -46874, -795322, 0));
+	printf(" %i\n", printf(s3,"", -2, -56, -46874, -795322, 0));
 } */
