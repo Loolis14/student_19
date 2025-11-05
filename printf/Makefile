@@ -6,13 +6,13 @@
 #    By: mmeurer <mmeurer@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/10/29 23:08:41 by mmeurer           #+#    #+#              #
-#    Updated: 2025/10/29 23:08:43 by mmeurer          ###   ########.fr        #
+#    Updated: 2025/11/05 13:39:53 by mmeurer          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME:=libftprintf.a
 
-SRC:= ft_printf.c cases_char.c cases_digit.c cases_utiles.c
+SRC:= ft_printf.c cases_char.c cases_digit.c cases_utils.c
 OBJ:=$(SRC:.c=.o)
 
 CC:=cc

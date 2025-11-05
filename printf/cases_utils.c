@@ -1,18 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   cases_utiles.c                                     :+:      :+:    :+:   */
+/*   cases_utils.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mmeurer <mmeurer@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/29 22:58:40 by mmeurer           #+#    #+#             */
-/*   Updated: 2025/10/29 23:06:25 by mmeurer          ###   ########.fr       */
+/*   Updated: 2025/11/02 21:20:53 by mmeurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_printf.h"
-#include <stddef.h> //provides size_t
-#include <unistd.h> //provides write and ssize_t
+#include <unistd.h>
 
 size_t	ft_strlen(const char *str)
 {
@@ -26,7 +25,7 @@ size_t	ft_strlen(const char *str)
 	return (len);
 }
 
-unsigned int	ft_abs(long long nbr)
+unsigned int	ft_abs(int nbr)
 {
 	if (nbr < 0)
 	{
@@ -35,19 +34,35 @@ unsigned int	ft_abs(long long nbr)
 	return (nbr);
 }
 
-int	ft_putnbr_base(long long nbr, char *base)
+ssize_t	ft_putnbr_base(uintmax_t nbr, char *base)
 {
-	char				c;
-	ssize_t				count;
-	long long			size;
+	char	c;
+	ssize_t	count;
+	size_t	size;
 
 	count = 0;
 	size = ft_strlen(base);
 	if (nbr >= size)
 	{
-		count += ft_putnbr_base(((long long) nbr / size), base);
+		count += ft_putnbr_base(((uintmax_t) nbr / size), base);
 	}
 	c = base[nbr % size];
-	count += write (1, &c, 1);
+	count += write(STDOUT_FILENO, &c, 1);
 	return (count);
+}
+
+bool	is_supported(char c)
+{
+	const char *s;
+
+	s = "cspdiuxX%";
+	while (*s)
+	{
+		if (*s == c)
+		{
+			return (true);
+		}
+		++s;
+	}
+	return (false);
 }

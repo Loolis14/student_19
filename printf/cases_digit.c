@@ -6,15 +6,13 @@
 /*   By: mmeurer <mmeurer@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/29 23:07:46 by mmeurer           #+#    #+#             */
-/*   Updated: 2025/10/29 23:07:50 by mmeurer          ###   ########.fr       */
+/*   Updated: 2025/11/05 13:34:02 by mmeurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_printf.h"
-#include <stdarg.h> //provides va_
-#include <unistd.h> //provides write and ssize_t
 
-int	case_d(va_list args)
+ssize_t	case_d(va_list args)
 {
 	char	*dec_base;
 	ssize_t	count;
@@ -25,13 +23,13 @@ int	case_d(va_list args)
 	n = va_arg(args, int);
 	if (n < 0)
 	{
-		count += write(1, "-", 1);
+		count += write(STDOUT_FILENO, "-", 1);
 	}
 	count += ft_putnbr_base(ft_abs(n), dec_base);
 	return (count);
 }
 
-int	case_i(va_list args)
+ssize_t	case_i(va_list args)
 {
 	char	*dec_base;
 	ssize_t	count;
@@ -42,44 +40,38 @@ int	case_i(va_list args)
 	n = va_arg(args, int);
 	if (n < 0)
 	{
-		count += write(1, "-", 1);
+		count += write(STDOUT_FILENO, "-", 1);
 	}
 	count += ft_putnbr_base(ft_abs(n), dec_base);
 	return (count);
 }
 
-int	case_u(va_list args)
+ssize_t	case_u(va_list args)
 {
 	char			*dec_base;
-	ssize_t			count;
 	unsigned int	n;
 
 	dec_base = "0123456789";
 	n = va_arg(args, unsigned int);
-	count = ft_putnbr_base(n, dec_base);
-	return (count);
+	return (ft_putnbr_base(n, dec_base));
 }
 
-int	case_x(va_list args)
+ssize_t	case_x(va_list args)
 {
-	ssize_t				count;
+	char			*hex_base;
+	unsigned int	n;
+
+	hex_base = "0123456789abcdef";
+	n = va_arg(args, int);
+	return (ft_putnbr_base(n, hex_base));
+}
+
+ssize_t	case_upper_x(va_list args)
+{
 	char				*hex_base;
 	unsigned int		n;
 
 	hex_base = "0123456789abcdef";
 	n = va_arg(args, int);
-	count = ft_putnbr_base(n, hex_base);
-	return (count);
-}
-
-int	case_upper_x(va_list args)
-{
-	ssize_t				count;
-	char				*hex_base;
-	unsigned int		n;
-
-	hex_base = "0123456789abcdef";
-	n = va_arg(args, int);
-	count = ft_putnbr_base(n, hex_base);
-	return (count);
+	return (ft_putnbr_base(n, hex_base));
 }
