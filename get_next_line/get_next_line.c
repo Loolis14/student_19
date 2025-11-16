@@ -5,124 +5,135 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: mmeurer <mmeurer@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/11/05 16:59:26 by mmeurer           #+#    #+#             */
-/*   Updated: 2025/11/05 22:46:32 by mmeurer          ###   ########.fr       */
+/*   Created: 2025/11/15 18:17:18 by mmeurer           #+#    #+#             */
+/*   Updated: 2025/11/16 01:23:49 by mmeurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
-#include <unistd.h> //provides read and ssize_t
-#include <stdlib.h> //provides size_t and free and NULL
+#include <stddef.h>
 #ifndef BUFFER_SIZE
 # define BUFFER_SIZE 42
 #endif
+#include "get_next_line.h"
+#include <unistd.h> //provides read
+#include <stdlib.h> //provides free
+#include <stdio.h> //test à supprimer
 
-char	*checks(ssize_t bytes_read, char *stash)
+char	*resize_buffer(t_buffer *buffer)
 {
-	if (bytes_read == -1)
+	size_t	new_capacity;
+	char	*new_buffer;
+
+	new_capacity = buffer->capacity * 2;
+	buffer->capacity = new_capacity;
+	new_buffer = malloc(new_capacity);
+	if (new_buffer == NULL)
 	{
-		free(stash);
 		return (NULL);
 	}
-	else if (bytes_read == 0)
-	{
-		if (stash[0] == '\0')
-			return (NULL);
-		return (stash);
-	}
-	return (stash);
+	ft_memcpy(new_buffer, buffer->content, buffer->length);
+	free(buffer->content);
+	buffer->content = new_buffer;
+	return (buffer->content);
 }
 
-char	*read_up_to_nl(char *stash, int fd)
+char	*search_nl(int fd, t_buffer *buffer)
 {
-	char	*temp;
-	char	buffer[BUFFER_SIZE + 1];
-	ssize_t	bytes_read;
+	ssize_t	byte_read;
+	char	*eol_ptr;
 
-	bytes_read = 1;
-	if (stash == NULL)
-		stash = ft_strdup("");
-	while (bytes_read > 0 && !ft_strchr(stash, '\n'))
+	eol_ptr = ft_memchr(buffer->content, '\n', buffer->length);
+	while (!eol_ptr)
 	{
-		bytes_read = read(fd, buffer, BUFFER_SIZE);
-		if (!checks(bytes_read, stash))
+		if (buffer->capacity - buffer-> length < BUFFER_SIZE)
 		{
+			if (!resize_buffer(buffer))
+				return (NULL);
+		}
+		byte_read = read(fd, buffer->content + buffer->length, BUFFER_SIZE);
+		if (byte_read == -1)
 			return (NULL);
-		}
-		else if (bytes_read == 0 && checks(bytes_read, stash))
+		buffer->length += byte_read;
+		if (byte_read > 0)
 		{
-			return (stash);
+			eol_ptr = ft_memchr(buffer->content, '\n', buffer->length);
+			continue ;
 		}
-		buffer[bytes_read] = '\0';
-		temp = stash;
-		stash = ft_strjoin(temp, buffer);
-		free(temp);
+		if (buffer->length == 0)
+			return (NULL);
+		eol_ptr = buffer->content + buffer->length - 1;
 	}
-	return (stash);
+	return (eol_ptr);
 }
 
-char	*set_line(char *stash)
+char	*create_line(char *s, size_t n)
 {
-	size_t	i;
-	char	*line;
+	char	*new_line;
 
-	i = 0;
-	while (stash[i] != '\n' && stash[i] != '\0')
+	new_line = malloc(n + 1);
+	if (new_line == NULL)
 	{
-		++i;
-	}
-	line = ft_substr(stash, 0, i);
-	if (line == NULL)
-	{
-		free(stash);
+		free(s);
 		return (NULL);
 	}
-	return (line);
+	ft_memcpy(new_line, s, n);
+	new_line[n] = '\0';
+	return (new_line);
 }
 
-char	*free_stash(char *stash, size_t len_line)
+char	*extract_line(t_buffer *buffer, char *eol_ptr)
 {
-	char	*stash_freed;
+	char	*new_line;
+	size_t	length_nl;
 
-	stash_freed = ft_substr(stash, len_line + 1, ft_strlen(stash) - len_line);
-	if (stash_freed == NULL)
+	length_nl = eol_ptr - buffer->content + 1;
+	new_line = malloc(length_nl + 1);
+	if (new_line == NULL)
 	{
+		free(buffer->content);
 		return (NULL);
 	}
-	return (stash_freed);
+	ft_memcpy(new_line, buffer->content, length_nl);
+	new_line[length_nl] = '\0';
+	buffer->length -= length_nl;
+	ft_memcpy(buffer->content, buffer->content + length_nl, buffer->length);
+	return (new_line);
 }
 
 char	*get_next_line(int fd)
 {
-	static char	*stash;
-	char		*line;
+	static t_buffer	buffer = {NULL, BUFFER_SIZE, 0};
+	char			*eol_ptr;
 
 	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
 	{
-		free(stash);
+		free(buffer.content);
 		return (NULL);
 	}
-	stash = read_up_to_nl(stash, fd);
-	if (stash == NULL)
+	if (buffer.content == NULL)
+	{
+		buffer.content = malloc(BUFFER_SIZE);
+		if (buffer.content == NULL)
+		{
+			return (NULL);
+		}
+	}
+	eol_ptr = search_nl(fd, &buffer);
+	if (eol_ptr == NULL)
 	{
 		return (NULL);
 	}
-	line = set_line(stash);
-	stash = free_stash(stash, ft_strlen(line));
-	return (line);
+	return (extract_line(&buffer, eol_ptr));
 }
 
-/* #include <stdio.h>
-#include <fcntl.h>
+/* #include <fcntl.h>
+#include <stdio.h>
+#include <string.h>
 int main()
 {
-	int fd;
-	char	*s;
+	int fd = open("test.txt", O_RDONLY);
+	printf("%s",get_next_line(fd));
 
-	fd = open("test.txt", O_RDONLY);
-	while ((s = get_next_line(fd)))
-	{
-		puts(s);
-	}
-	close (fd);
+	close(fd);
+
 } */
