@@ -1,32 +1,59 @@
-//stack a = argv, stack b empty
-/* #include "push_swap.h"
-#include <unistd.h>
-#include <stdio.h>
-#include <stddef.h> */
 //printf("%c",argv[i][j]);
-
 //printf("%c",argv[i][j]);
-
-//création deque
-
 #include "push_swap.h"
+#include <stddef.h>
+#include <stdio.h> //ssize_t à supprimer !
 
-stack	create_stack(int *numbers, int count)
+int main(int argc, char **argv)
 {
-	stack	a;
+	ssize_t count;
+	t_deque	*a;
+	t_deque	*b;
 
-	a.numbers = numbers;
-	a.front = numbers[0];
-	a.capacity = count;
-	a.size = count;
+	if (argc == 1 || argv[1][0] == '\0')
+	{
+		return (0);
+	}
+	count = count_numbers(argv + 1);
+	if (count == -1 || count == 0)
+	{
+		printf("%s", "Error\n");
+		return (0);
+	}
+	printf("count = %zi\n", count);
+	a = create_t_deque(count, 'a');
+	if (!parse_numbers(argv + 1, a))
+	{
+		printf("%s", "Error\n");
+		//free(a); à faire
+		return (0);
+	}
+	if (!is_sorted(a))
+	{
+		b = create_t_deque(count, 'b');
+		dispatch_by_length(a, b);
+		//free(a); à faire
+		//free(b); à faire
+	}
+	else
+	{
+		//free(a); à faire
+		return (0);
+	}
 
-	return (a);
+	//print les nombres
+	size_t i= 0;
+	printf("taille b %zi\n", b->length);
+	while (i < b->length)
+	{
+		printf("deque b %i\n", b->numbers[(b->front + i) % b->capacity]);
+		++i;
+	}
+	printf("taille a %zi\n", a->length);
+	i = 0;
+	while (i < a->length)
+	{
+		printf("deque a %i\n", a->numbers[(a->front + i) % a->capacity]);
+		++i;
+	}
 }
-
-//get_rear() rear = (front + size - 1) % capacity
-//get_front() arr[front]
-
-
-//move front forward : front = (front + 1) % capacity -> then --size;
-//insert element at the reat : rear = (front + size) % capacity -> then ++size;
-//Removed an element from the front : front = (front + 1 %) capacity then --size;
