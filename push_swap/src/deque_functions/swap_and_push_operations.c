@@ -6,7 +6,7 @@
 /*   By: mmeurer <mmeurer@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/23 12:07:30 by mmeurer           #+#    #+#             */
-/*   Updated: 2025/12/23 22:31:09 by mmeurer          ###   ########.fr       */
+/*   Updated: 2025/12/30 23:57:18 by mmeurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,9 +27,10 @@ void	swap_one(t_deque *deque)
 	{
 		return ;
 	}
-	swap(&deque->numbers[deque->front], &deque->numbers[(deque->front + 1) % deque->capacity]);
-	if (deque->cost_calcul == false)
-		printf("%c%c\n", 's', deque->tag);
+	swap(&deque->numbers[(deque->front) % deque->capacity], &deque->numbers[(deque->front + 1) % deque->capacity]);
+	write(1, "s", 1);
+	write(1, &deque->tag, 1);
+	write(1, "\n", 1);
 	return ;
 }
 
@@ -37,8 +38,7 @@ void	swap_both(t_deque *a, t_deque *b)
 {
 	swap(&a->numbers[a->front], &a->numbers[(a->front + 1) % a->capacity]);
 	swap(&b->numbers[b->front], &b->numbers[(b->front + 1) % b->capacity]);
-	if (a->cost_calcul == false || b->cost_calcul == false)
-		write(1, "ss", 2);
+	write(1, "ss\n", 3);
 	return ;
 }
 
@@ -52,6 +52,7 @@ void	push_queue(t_deque *to_push, t_deque *to_pop)
 	}
 	first_element_to_pop = pop_front(to_pop);
 	push_front(to_push, first_element_to_pop);
-	if (to_push->cost_calcul == false || to_pop->cost_calcul == false)
-		printf("%c%c\n", 'p', to_push->tag);
+	write(1, "p", 1);
+	write(1, &to_push->tag, 1);
+	write(1, "\n", 1);
 }

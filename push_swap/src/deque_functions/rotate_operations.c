@@ -6,7 +6,7 @@
 /*   By: mmeurer <mmeurer@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/23 12:05:24 by mmeurer           #+#    #+#             */
-/*   Updated: 2025/12/23 22:28:18 by mmeurer          ###   ########.fr       */
+/*   Updated: 2025/12/29 21:53:57 by mmeurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,9 @@ void	rotate_one(t_deque *deque)
 
 	first_element = pop_front(deque);
 	push_back(deque, first_element);
-	if (deque->cost_calcul == false)
-		printf("%c%c\n", 'r', deque->tag);
+	write(1, "r", 1);
+	write(1, &deque->tag, 1);
+	write(1, "\n", 1);
 }
 
 void	rotate_both(t_deque *a, t_deque *b)
@@ -32,8 +33,7 @@ void	rotate_both(t_deque *a, t_deque *b)
 	first_element_b = pop_front(b);
 	push_back(a, first_element_a);
 	push_back(b, first_element_b);
-	if (a->cost_calcul == false || b->cost_calcul == false)
-		write(1, "rr", 2);
+	write(1, "rr\n", 3);
 }
 
 void	reverse_rotate_one(t_deque *deque)
@@ -42,8 +42,9 @@ void	reverse_rotate_one(t_deque *deque)
 
 	last_element = pop_back(deque);
 	push_front(deque, last_element);
-	if (deque->cost_calcul == false)
-		printf("%s%c\n", "rr", deque->tag);
+	write(1, "rr", 2);
+	write(1, &deque->tag, 1);
+	write(1, "\n", 1);
 }
 
 void	reverse_rotate_both(t_deque *a, t_deque *b)
@@ -55,6 +56,5 @@ void	reverse_rotate_both(t_deque *a, t_deque *b)
 	last_element_b = pop_back(b);
 	push_front(a, last_element_a);
 	push_front(b, last_element_b);
-	if (a->cost_calcul == false || b->cost_calcul == false)
-		printf("%s\n", "rrr");
+	write(1, "rrr\n", 4);
 }

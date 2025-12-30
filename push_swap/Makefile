@@ -6,7 +6,7 @@
 #    By: mmeurer <mmeurer@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/12/13 17:39:09 by mmeurer           #+#    #+#              #
-#    Updated: 2025/12/24 16:27:47 by mmeurer          ###   ########.fr        #
+#    Updated: 2025/12/30 20:39:33 by mmeurer          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,8 +15,8 @@ NAME:=push_swap
 SRC:=	$(addprefix src/deque_functions/, deque_manipulations.c primitive_functions.c rotate_operations.c swap_and_push_operations.c) \
 		$(addprefix src/parse_numbers/, count_numbers.c parse_numbers.c) \
 		$(addprefix src/, push_swap.c) \
-		$(addprefix src/tri_functions/, sort_main.c sort_3.c sort_less_5.c checks.c sort_stack_a.c turk_algorithm.c) \
-		brouillon.c
+		$(addprefix src/tri_functions/, checks.c sort_3.c sort_4.c sort_main.c) \
+		$(addprefix src/turk/, algorithm_utils.c push_to_the_top.c repush_stack_b.c sort_stack_a.c) \
 
 OBJ:=$(SRC:.c=.o)
 
