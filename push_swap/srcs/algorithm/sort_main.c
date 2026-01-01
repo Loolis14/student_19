@@ -6,13 +6,20 @@
 /*   By: mmeurer <mmeurer@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/30 13:54:19 by mmeurer           #+#    #+#             */
-/*   Updated: 2025/12/30 21:08:18 by mmeurer          ###   ########.fr       */
+/*   Updated: 2025/12/31 11:37:12 by mmeurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
 
-void	turk(t_deque *a, t_deque *b)
+static void	sort_4(t_deque *a, t_deque *b)
+{
+	push_queue(b, a);
+	sort_3(a);
+	repush_stack_b(a, b);
+}
+
+static void	turk(t_deque *a, t_deque *b)
 {
 	size_t		idx_min;
 	ssize_t		count_rotation;

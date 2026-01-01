@@ -6,13 +6,13 @@
 /*   By: mmeurer <mmeurer@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/23 12:10:15 by mmeurer           #+#    #+#             */
-/*   Updated: 2025/12/29 21:54:50 by mmeurer          ###   ########.fr       */
+/*   Updated: 2025/12/31 11:30:33 by mmeurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
 
-int	ft_atoi(const char *nptr)
+static int	ft_atoi(const char *nptr)
 {
 	unsigned int	nbr;
 	int				neg;

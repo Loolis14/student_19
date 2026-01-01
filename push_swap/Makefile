@@ -6,17 +6,17 @@
 #    By: mmeurer <mmeurer@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/12/13 17:39:09 by mmeurer           #+#    #+#              #
-#    Updated: 2025/12/30 20:39:33 by mmeurer          ###   ########.fr        #
+#    Updated: 2025/12/31 10:30:41 by mmeurer          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME:=push_swap
 
-SRC:=	$(addprefix src/deque_functions/, deque_manipulations.c primitive_functions.c rotate_operations.c swap_and_push_operations.c) \
-		$(addprefix src/parse_numbers/, count_numbers.c parse_numbers.c) \
-		$(addprefix src/, push_swap.c) \
-		$(addprefix src/tri_functions/, checks.c sort_3.c sort_4.c sort_main.c) \
-		$(addprefix src/turk/, algorithm_utils.c push_to_the_top.c repush_stack_b.c sort_stack_a.c) \
+SRC:=	$(addprefix srcs/, push_swap.c) \
+		$(addprefix srcs/deque/, create_and_search.c primitive_manipulations.c rotate_operations.c swap_and_push_operations.c) \
+		$(addprefix srcs/parsing/, count_numbers.c parse_numbers.c) \
+		$(addprefix srcs/algorithm/, checks.c sort_3.c sort_main.c) \
+		$(addprefix srcs/algorithm/turk/, sort_stack_a.c push_to_the_top.c repush_stack_b.c  utils.c utils_2.c) \
 
 OBJ:=$(SRC:.c=.o)
 

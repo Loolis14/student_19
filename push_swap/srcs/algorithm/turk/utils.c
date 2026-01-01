@@ -1,21 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   algorithm_utils.c                                  :+:      :+:    :+:   */
+/*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mmeurer <mmeurer@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/30 20:12:56 by mmeurer           #+#    #+#             */
-/*   Updated: 2025/12/30 21:30:10 by mmeurer          ###   ########.fr       */
+/*   Updated: 2025/12/31 10:21:07 by mmeurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
-#include <stddef.h>
-#include <stdlib.h>
-#include <unistd.h>
 
-size_t	ft_min(size_t a, size_t b)
+static size_t	ft_min(size_t a, size_t b)
 {
 	if (a <= b)
 	{
@@ -33,7 +30,7 @@ size_t	ft_max(size_t a, size_t b)
 	return (b);
 }
 
-size_t	ft_abs(ssize_t n)
+static size_t	ft_abs(ssize_t n)
 {
 	if (n < 0)
 	{
@@ -42,16 +39,16 @@ size_t	ft_abs(ssize_t n)
 	return (n);
 }
 
-ssize_t	number_of_rotations(size_t index, size_t length) //find direction + count
+ssize_t	number_of_rotations(size_t index, size_t length)
 {
-    if (index <= (length - 1) / 2)
-    {
-        return (index);
-    }
-    return (index - length);
+	if (index <= (length - 1) / 2)
+	{
+		return (index);
+	}
+	return (index - length);
 }
 
-size_t	calculate_cost(size_t index_of_b, size_t index_of_a, size_t length_a, size_t length_b)
+size_t	calculate_cost(size_t idx_b, size_t idx_a, size_t lgh_a, size_t lgh_b)
 {
 	size_t	cost;
 	ssize_t	rotation_a;
@@ -60,8 +57,8 @@ size_t	calculate_cost(size_t index_of_b, size_t index_of_a, size_t length_a, siz
 	size_t	rb;
 
 	cost = 0;
-	rotation_a = number_of_rotations(index_of_a, length_a);
-	rotation_b = number_of_rotations(index_of_b, length_b);
+	rotation_a = number_of_rotations(idx_a, lgh_a);
+	rotation_b = number_of_rotations(idx_b, lgh_b);
 	ra = ft_abs(rotation_a);
 	rb = ft_abs(rotation_b);
 	if (rotation_a > 0 && rotation_b > 0)
@@ -73,34 +70,4 @@ size_t	calculate_cost(size_t index_of_b, size_t index_of_a, size_t length_a, siz
 		cost = ra + rb;
 	}
 	return (cost);
-}
-
-size_t	limits_idx_value(t_deque *deque, char c)
-{
-	size_t	i;
-	limits	extrema;
-
-	extrema.max = deque_at(deque, 0);
-	extrema.index_max = 0;
-	extrema.min = deque_at(deque, 0);
-	extrema.index_min = 0;
-	i = 1;
-	while (i < deque->length)
-	{
-		if (deque_at(deque, i) > extrema.max)
-		{
-			extrema.max = deque_at(deque, i);
-			extrema.index_max = i;
-		}
-		else if (deque_at(deque, i) < extrema.min)
-		{
-			extrema.min = deque_at(deque, i);
-			extrema.index_min = i;
-		}
-		++i;
-	}
-	if (c == '+')
-		return (extrema.index_max);
-	else
-		return(extrema.index_min);
 }

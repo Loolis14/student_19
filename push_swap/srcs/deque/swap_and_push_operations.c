@@ -6,7 +6,7 @@
 /*   By: mmeurer <mmeurer@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/23 12:07:30 by mmeurer           #+#    #+#             */
-/*   Updated: 2025/12/30 23:57:18 by mmeurer          ###   ########.fr       */
+/*   Updated: 2025/12/31 09:57:07 by mmeurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,11 +23,17 @@ static void	swap(int *a, int *b)
 
 void	swap_one(t_deque *deque)
 {
+	int	first_element;
+	int	second_element;
+
 	if (deque->length < 2)
 	{
 		return ;
 	}
-	swap(&deque->numbers[(deque->front) % deque->capacity], &deque->numbers[(deque->front + 1) % deque->capacity]);
+	first_element = pop_front(deque);
+	second_element = pop_front(deque);
+	push_front(deque, first_element);
+	push_front(deque, second_element);
 	write(1, "s", 1);
 	write(1, &deque->tag, 1);
 	write(1, "\n", 1);

@@ -6,13 +6,13 @@
 /*   By: mmeurer <mmeurer@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/30 13:54:34 by mmeurer           #+#    #+#             */
-/*   Updated: 2025/12/30 14:18:50 by mmeurer          ###   ########.fr       */
+/*   Updated: 2025/12/31 11:28:17 by mmeurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
 
-int	position_max(t_deque *deque)
+static int	position_max(t_deque *deque)
 {
 	if (deque_at(deque, 0) >= deque_at(deque, 1)
 		&& deque_at(deque, 0) >= deque_at(deque, 2))

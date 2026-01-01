@@ -6,12 +6,11 @@
 /*   By: mmeurer <mmeurer@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/23 12:05:24 by mmeurer           #+#    #+#             */
-/*   Updated: 2025/12/29 21:53:57 by mmeurer          ###   ########.fr       */
+/*   Updated: 2025/12/31 10:03:13 by mmeurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
-#include <stdbool.h>
 
 void	rotate_one(t_deque *deque)
 {

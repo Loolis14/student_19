@@ -6,12 +6,11 @@
 /*   By: mmeurer <mmeurer@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/30 13:54:38 by mmeurer           #+#    #+#             */
-/*   Updated: 2025/12/30 13:54:39 by mmeurer          ###   ########.fr       */
+/*   Updated: 2025/12/31 10:03:33 by mmeurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
-#include <stdbool.h>
 
 bool	is_sorted(t_deque *deque)
 {

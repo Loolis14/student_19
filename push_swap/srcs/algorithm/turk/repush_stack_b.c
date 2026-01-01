@@ -6,44 +6,34 @@
 /*   By: mmeurer <mmeurer@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/30 14:32:41 by mmeurer           #+#    #+#             */
-/*   Updated: 2025/12/30 21:08:36 by mmeurer          ###   ########.fr       */
+/*   Updated: 2025/12/31 11:27:56 by mmeurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
-#include <stddef.h>
-#include <stdlib.h>
-#include <unistd.h>
+#include <limits.h>
 
 static ssize_t	find_closest_bigger(int b_number, t_deque *a)
 {
+	int		value;
+	int		closest_bigger;
 	size_t	i;
-	ssize_t	index_a;
-	int		tmp_number_in_a;
+	ssize_t	idx_of_closest_bigger;
 
+	idx_of_closest_bigger = -1;
+	closest_bigger = INT_MAX;
 	i = 0;
-	index_a = -1;
 	while (i < a->length)
 	{
-		if (deque_at(a, i) > b_number)
+		value = deque_at(a, i);
+		if (value > b_number && value <= closest_bigger)
 		{
-			tmp_number_in_a = deque_at(a, i);
-			index_a = i;
-			++i;
-			break ;
+			closest_bigger = value;
+			idx_of_closest_bigger = i;
 		}
 		++i;
 	}
-	while (i < a->length)
-	{
-		if (deque_at(a, i) > b_number && deque_at(a, i) < tmp_number_in_a)
-		{
-			tmp_number_in_a = deque_at(a, i);
-			index_a = i;
-		}
-		++i;
-	}
-	return (index_a);
+	return (idx_of_closest_bigger);
 }
 
 void	repush_stack_b(t_deque *a, t_deque *b)
