@@ -6,7 +6,7 @@
 /*   By: mmeurer <mmeurer@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/30 13:54:19 by mmeurer           #+#    #+#             */
-/*   Updated: 2025/12/31 11:37:12 by mmeurer          ###   ########.fr       */
+/*   Updated: 2026/01/01 23:46:07 by mmeurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,18 @@
 
 static void	sort_4(t_deque *a, t_deque *b)
 {
+	size_t		idx_min;
+	ssize_t		count_rotation;
+
 	push_queue(b, a);
 	sort_3(a);
 	repush_stack_b(a, b);
+	if (!is_sorted(a))
+	{
+		idx_min = limits_idx_value(a, '-');
+		count_rotation = number_of_rotations(idx_min, a->length);
+		rotate_by_one(a, count_rotation);
+	}
 }
 
 static void	turk(t_deque *a, t_deque *b)
