@@ -3,14 +3,14 @@
 # Author: ebabun <ebabun@student.42belgium.be>
 # Author: mmeurer <mmeurer@student.42belgium.be>
 # Created: 2026/01/20 18:33:22
-# Updated: 2026/01/20 18:02:15
+# Updated: 2026/01/21 18:02:15
 
 from __future__ import annotations
 from typing import Dict
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from maze import Maze
+    from maze_generator import MazeGenerator
 
 
 class Cell(object):
@@ -31,7 +31,7 @@ class Cell(object):
             "W": (-1, 0)
             }
 
-    def __init__(self, x: int, y: int, maze: Maze) -> None:
+    def __init__(self, x: int, y: int, maze: MazeGenerator) -> None:
         """Initialise the attributes of a cell."""
         self.maze = maze
         self.coord: tuple = (x, y)
@@ -67,14 +67,12 @@ class Cell(object):
         self.walls[dir] = 0
         neighbor_cell.walls[self.OPPOSITE[dir]] = 0
 
-    def get_direction(self, next) -> str:
+    def get_direction(self, neighbor) -> str:
         """Return the direction between two cells"""
-        dx, dy = next - self
+        dx, dy = neighbor - self
         for k, v in self.OFFSET.items():
             if v == (dx, dy):
                 return k
-        else:
-            raise ValueError("Cells are not adjacent")
 
     def get_neighbor(self, dir) -> Cell:
         """Get the adjacent cell in the direction given"""
