@@ -6,17 +6,54 @@
 # Updated: 2026/01/24 16:09:10
 
 from maze_generator import MazeGenerator
+from typing import Dict
 
 
 class MazeParser:
-    def __init__(self, filename, maze_size, config):
+    """
+    A class to display a maze in terminal ASCII rendering.
+    """
+
+    def __init__(self, filename, maze_size, config: Dict[str]):
+        """
+        Attributs:
+        - name (str): the name of the file to open
+        - config (dict): config of the maze
+        - maze_size (int): height of the maze
+
+        From file.txt:
+        - maze (list[list]): lines of hexadecimal
+        - entry (tuple): coordinates of the entry cell
+        - exit (tuple): coordinates of the exit cell
+        - path (str): shortest path to the exit
+        """
+
         self.name = filename
         self.config = config
         self.maze_size = maze_size
-        self.maze: list = []
+        self.maze: list[list] = []
         self.entry: tuple = ()
         self.exit: tuple = ()
         self.path = ""
+
+    @staticmethod
+    def show_menu():
+        print("\n=== A-Maze-ing ===")
+        print("1. Re-generate a new maze")
+        print("2. Show/Hide path from entry to exit")
+        print("3. Rotate maze colors")
+        print("4. Quit")
+
+    @staticmethod
+    def get_choice():
+        wrong_choice = False
+        while True:
+            choice = input("Choice? (1-4): ")
+            if choice in {'1', '2', '3', '4'}:
+                return choice, wrong_choice
+            else:
+                print("Invalid choice, please enter a number from 1 to 4.")
+                wrong_choice = True
 
     def open_file(self):
         try:
@@ -88,25 +125,6 @@ class MazeParser:
             cy += y
             path.append((cx, cy))
         return path
-
-    @staticmethod
-    def show_menu():
-        print("\n=== A-Maze-ing ===")
-        print("1. Re-generate a new maze")
-        print("2. Show/Hide path from entry to exit")
-        print("3. Rotate maze colors")
-        print("4. Quit")
-
-    @staticmethod
-    def get_choice():
-        wrong_choice = False
-        while True:
-            choice = input("Choice? (1-4): ")
-            if choice in {'1', '2', '3', '4'}:
-                return choice, wrong_choice
-            else:
-                print("Invalid choice, please enter a number from 1 to 4.")
-                wrong_choice = True
 
     def regenerate_maze(self):
         maze = MazeGenerator(self.config)
