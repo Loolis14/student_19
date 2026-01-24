@@ -31,7 +31,7 @@ def main() -> None:
     # generate maze passing "DFS" or "Wilson" as argument
     my_maze.generate_maze()
 
-    parsing = MazeParser(my_maze.output_file, my_maze.rows)
+    parsing = MazeParser(my_maze.output_file, my_maze.rows, config_file)
     parsing.display_ascii()
 
     # Affichage avec MiniLibX
