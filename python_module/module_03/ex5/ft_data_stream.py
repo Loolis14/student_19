@@ -12,9 +12,17 @@ def fibonacci(n):
         a, b = b, (a + b)
 
 
-def prime_numbers(n):
-    for i in range(2, n):
-        if i 
+def prime_numbers():
+    n = 2
+    while True:
+        is_prime = True
+        for i in range(2, int(n ** 0.5) + 1):
+            if n % i == 0:
+                is_prime = False
+                break
+        if is_prime:
+            yield n
+        n += 1
 
 
 if __name__ == "__main__":
@@ -25,8 +33,13 @@ if __name__ == "__main__":
     print(f"Event {next(events)} : Player bob (level 12) found treasure")
     print(f"Event {next(events)} : Player charlie (level 8) leveled up")
     print("...\n")
+    print("=== Generator Demonstration ===\n")
     n = 10
     value = fibonacci(n)
     print(f"Fibonacci sequence (first {n}): {next(value)}, {next(value)}, "
           f"{next(value)}, {next(value)}, {next(value)}, {next(value)}, "
           f"{next(value)}, {next(value)}, {next(value)}, {next(value)}")
+    prime = prime_numbers()
+    n = 5
+    solution = ", ".join(str(next(prime)) for _ in range(n))
+    print(f'Prime numbers (first {n}): {solution}')
