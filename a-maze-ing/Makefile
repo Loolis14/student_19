@@ -7,21 +7,17 @@
 
 PYTHON := python3
 VENV := venv
-PYTHON_VENV := $(VENV)/bin/python
+PYTHON_VENV := $(VENV)/bin/python3
 
 SRC := a_maze_ing.py
 CONFIG := config.txt
-AFFICHAGE := maze_renderer.py
-
-venv:
-	python3.12 -m venv venv
-	$(PYTHON) install -r requirements.txt
 
 run:
-	$(PYTHON) $(SRC) $(CONFIG)
+	$(PYTHON_VENV) $(SRC) $(CONFIG)
 
-play:
-	$(PYTHON) $(AFFICHAGE)
+install:
+	python3.12 -m venv venv
+	$(PYTHON_VENV) -m pip install -r requirements.txt
 
 debug:
 	$(PYTHON_VENV) -m pdb $(MAIN)
@@ -32,8 +28,8 @@ clean:
 	find . -type d -name ".pytest_cache" -exec rm -rf {} +
 
 lint:
-	$(PYTHON_VENV) -m flake8 .
-	$(PYTHON_VENV) -m mypy . \
+	$(PYTHON_VENV) -m flake8 . --exclude venv ; \
+	$(PYTHON_VENV) -m mypy . --exclude venv \
 		--warn-return-any \
 		--warn-unused-ignores \
 		--ignore-missing-imports \
