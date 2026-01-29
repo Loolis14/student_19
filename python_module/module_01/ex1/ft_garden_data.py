@@ -2,17 +2,21 @@
 
 class Plant:
     """
-    A class to define plant
+    A class to define a plant.
     """
-    def __init__(self, name, height, age):
+    def __init__(self, name: str, height: int, age: int) -> None:
+        """
+        Initalize of a plant
+        Args: name, height and age
+        """
         self.name = name
         self.height = height
         self.age = age
 
 
-def ft_garden_data():
+def ft_garden_data() -> None:
     """
-    function to print differents types of plant with the class
+    Print differents types of plant with the class.
     """
     p1 = Plant("Rose", 25, 30)
     p2 = Plant("Sunflower", 80, 45)

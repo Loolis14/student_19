@@ -31,7 +31,7 @@ class NumericProcessor(DataProcessor):
         return True
 
     def format_output(self, result: str) -> str:
-        return result + "Processed 5 numeric values, sum=15, avg=3.0"
+        return f"Ouput: {result}"
 
 
 class TextProcessor(DataProcessor):
