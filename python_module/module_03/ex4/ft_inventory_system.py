@@ -86,7 +86,7 @@ class InventoryMaster:
             for item in player.inventory:
                 if cls.data[item][1] == "rare":
                     rare.append(item)
-        print(f"Rarest items: {", ".join(rare)}")
+        print(f"Rarest items: {', '.join(rare)}")
 
 
 def transaction(player1, player2, item, qty):
@@ -112,5 +112,5 @@ if __name__ == "__main__":
     print()
     print(transaction(alice_bag, bob_bag, "potion", 2))
     print("\n=== Updated Inventories ===")
-    print(f"{alice_bag.name} potions : {alice_bag.inventory.get("potion")}")
-    print(f"{bob_bag.name} potions : {bob_bag.inventory.get("potion")}")
+    print(f"{alice_bag.name} potions : {alice_bag.inventory.get('potion')}")
+    print(f"{bob_bag.name} potions : {bob_bag.inventory.get('potion')}")

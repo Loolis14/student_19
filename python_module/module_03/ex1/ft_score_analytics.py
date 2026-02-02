@@ -1,33 +1,35 @@
 #!/usr/bin/env python3
 
 import sys
+from typing import List
 
 
-def create_score(args):
+def get_scores(args: List[str]) -> List[int] | None:
     """create an int list of scores"""
-    score = []
+    score: List = []
     for arg in args:
         try:
-            int(arg)
-        except ValueError:
-            return f"Oops, you typed '{arg}' instead of a number, monkey!"
-        else:
             score.append(int(arg))
+        except ValueError:
+            print(f"Oops, you typed '{arg}' instead of a number.")
     return score
 
 
 if __name__ == "__main__":
     print("=== Player Score Analytics ===")
-    if len(sys.argv) == 1:
+    if len(sys.argv) <= 1:
         print(
             "No scores provided. "
             "Usage: python3 ft_score_analytics.py <score1> <score2> ...")
     else:
-        score = create_score(sys.argv[1:])
-        print(f"Scores processed: {score}")
-        print(f"Total players: {len(score)}")
-        print(f"Total score: {sum(score)}")
-        print(f"Average score: {sum(score) / len(score)}")
-        print(f"High score: {max(score)}")
-        print(f"Low score: {min(score)}")
-        print(f"Score range: {max(score) - min(score)}")
+        score = get_scores(sys.argv[1:])
+        if not score:
+            print("No valid scores to process")
+        else:
+            print(f"Scores processed: {score}")
+            print(f"Total players: {len(score)}")
+            print(f"Total score: {sum(score)}")
+            print(f"Average score: {sum(score) / len(score)}")
+            print(f"High score: {max(score)}")
+            print(f"Low score: {min(score)}")
+            print(f"Score range: {max(score) - min(score)}")

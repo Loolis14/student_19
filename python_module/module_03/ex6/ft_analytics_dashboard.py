@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-achievements
-unique achievementss
-count des achievements
 
 class Player:
     score_categorie = {}
@@ -15,16 +12,16 @@ class Player:
         Player.score_categorie[name] = "débutant"
         Player.players.append(self)
 
-    def add_achivements(self, achievements):
+    def add_achievements(self, achievements):
         self.achievements += achievements
 
     def add_score(self, n):
         self.score += n
-        if 0 < self.score < 10:
+        if self.score < 10:
             Player.score_categorie[self.name] = "novice"
         elif 10 < self.score < 20:
             Player.score_categorie[self.name] = "expert"
-        elif 20 < self.score < 30:
+        elif 20 < self.score:
             Player.score_categorie[self.name] = "démoniaque"
 
 

@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
 
-def game_event():
-    for i in range(1, 1000):
-        yield i
+def game_event_stream():
+    players = ["alice", "bob", "charlie"]
+    events = ["killed monster", "found treasure", "leveled up"]
+    level = [5, 12, 8]
+
+    for i in range(3):
+        yield (f"Event {i + 1}: Player {players[i % 3]} "
+               f"(level {level[i]}) {events[i % 3]}")
 
 
 def fibonacci(n):
@@ -28,13 +33,14 @@ def prime_numbers():
 if __name__ == "__main__":
     print("=== Game Data Stream Processor ===\n")
     print("Processing 1000 game events...")
-    events = game_event()
-    print(f"Event {next(events)} : Player alice (level 5) killed monster")
-    print(f"Event {next(events)} : Player bob (level 12) found treasure")
-    print(f"Event {next(events)} : Player charlie (level 8) leveled up")
+    event_count = 0
+    for event in game_event_stream():
+        print(event)
+        event_count += 1
     print("...\n")
-    print("=== Generator Demonstration ===\n")
+    print("=== Generator Demonstration ===")
     n = 10
+    str_ = f"Fibonacci sequence (first {n}):"
     value = fibonacci(n)
     print(f"Fibonacci sequence (first {n}): {next(value)}, {next(value)}, "
           f"{next(value)}, {next(value)}, {next(value)}, {next(value)}, "
