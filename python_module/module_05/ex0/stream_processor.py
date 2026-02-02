@@ -22,6 +22,7 @@ class NumericProcessor(DataProcessor):
         return "".join(str(data))
 
     def validate(self, data: Any) -> bool:
+        # utiliser un operateur pour verifier que c'est un int
         for n in data:
             try:
                 int(n)
@@ -55,6 +56,7 @@ class LogProcessor(DataProcessor):
         return data
 
     def validate(self, data: Any) -> bool:
+        # Error info Warning, log = str
         try:
             data.keys()
         except Exception:
