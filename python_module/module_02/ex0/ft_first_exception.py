@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
-def check_temperature(temp_str):
-    """
-    Function to test if the temperature is a number and between 0 and 40
-    """
+"""First exercise."""
+
+
+def check_temperature(temp_str: str) -> int | None:
+    """Test if the temperature is a number and between 0 and 40."""
     print(f"\nTesting temperature: {temp_str}")
     try:
         temp_str = int(temp_str)
@@ -22,10 +23,8 @@ def check_temperature(temp_str):
             return temp_str
 
 
-def test_temperature_input():
-    """
-    Give examples to test a function
-    """
+def test_temperature_input() -> None:
+    """Test the check temperature function."""
     check_temperature("25")
     check_temperature("abc")
     check_temperature("100")

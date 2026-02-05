@@ -1,10 +1,17 @@
 #!/usr/bin/env python3
 
+"""First exercise."""
+
 from abc import ABC, abstractmethod
-from typing import Any, List, Dict
+from typing import Any, List
 
 
 class DataProcessor(ABC):
+    """Define common interface for all subclasses."""
+
+    def __init__(self):
+        super().__init__()
+
     @abstractmethod
     def process(self, data: Any) -> str:
         pass
@@ -13,94 +20,80 @@ class DataProcessor(ABC):
     def validate(self, data: Any) -> bool:
         pass
 
-    def format_output(self, result: str) -> str:
-        return result
+    def format_output(self, result: Any) -> str:
+        return f"Output: {result}"
 
 
 class NumericProcessor(DataProcessor):
+    """Process numeric data."""
+
     def process(self, data: List) -> str:
-        return "".join(str(data))
+        lenght: int = len(data)
+        sum_: int = sum(data)
+        average: int = sum_ / lenght
+        return f"Processed {lenght} numeric values, sum={sum_}, avg={average}"
 
     def validate(self, data: Any) -> bool:
-        # utiliser un operateur pour verifier que c'est un int
         for n in data:
-            try:
-                int(n)
-            except Exception:
-                print(f'{n} is not a number')
+            if not isinstance(n, int):
                 return False
         return True
 
     def format_output(self, result: str) -> str:
-        return f"Ouput: {result}"
+        return f"Output: {result}"
 
 
 class TextProcessor(DataProcessor):
-    def process(self, data: str) -> str:
-        return data
+    """Process text data."""
 
-    def validate(self, data: Any) -> bool:
-        try:
-            str(data)
-        except Exception:
-            print(f'{data} is not a string')
-            return False
-        return True
+    def process(self, data: str) -> str:
+        char_ = len(data)
+        word = len(data.split())
+        return f"Processed text: {char_} characters, {word} words"
+
+    def validate(self, data: str) -> bool:
+        if isinstance(data, str):
+            return True
+        return False
 
     def format_output(self, result: str) -> str:
-        return result + "Processed text: 17 characters, 3 words"
+        return f"Output: {result}"
 
 
 class LogProcessor(DataProcessor):
-    def process(self, data: Dict) -> str:
-        return data
+    """Process log data."""
 
-    def validate(self, data: Any) -> bool:
-        # Error info Warning, log = str
-        try:
-            data.keys()
-        except Exception:
-            print(f'{data} is not a dictionnary')
+    def process(self, data: str) -> str:
+        log: List = data.split()
+        return f'[{log[0]}] {log[0]} level detected: {" ".join(log[1:])}'
+
+    def validate(self, data: str) -> bool:
+        if not isinstance(data, str):
             return False
-        return True
+        if data.split()[0] in ["ERROR", "INFO", "WARN", "DEBUG"]:
+            return True
+        return False
 
     def format_output(self, result: str) -> str:
-        return result + "2 players on server"
-
-
-def test():
-    print("\nInitializing Numeric Processor...")
-    a = NumericProcessor()
-    data = [1, 2, 3, 4, 5]
-    result = "Output: "
-    print(f'Processing data: {a.process(data)}')
-    if a.validate(data):
-        print("Validation: Numeric data verified")
-    else:
-        print("Wrong: Numeric data not verified")
-    print(a.format_output(result))
-
-    print("\nInitializing Text Processor...")
-    b = TextProcessor()
-    sentence = "Hello Nexus World"
-    print(f'Processing data: {b.process(sentence)}')
-    if b.validate(sentence):
-        print("Text data verified")
-    else:
-        print("Text data not verified")
-    print(b.format_output(result))
-
-    print("\nInitializing Log Processor...")
-    c = LogProcessor()
-    dictionnary = {'Charlie': "active", 'Alice': "log out"}
-    print(f'Processing data: {c.process(dictionnary)}')
-    if c.validate(dictionnary):
-        print("Log data verified")
-    else:
-        print("Log data not verified")
-    print(c.format_output(result))
+        return f"Output: {result}"
 
 
 if __name__ == "__main__":
     print("=== CODE NEXUS - DATA PROCESSOR FOUNDATION ===")
-    test()
+    processor: List = [NumericProcessor(), LogProcessor(), TextProcessor()]
+    datas: List = [
+        [1, 2, 3, 4, 5],
+        "Hello Nexus World",
+        "ERROR Connection timeout"
+    ]
+    for data in datas:
+        for process in processor:
+            if process.validate(data):
+                name: str = process.__class__.__name__.replace("Processor", "")
+                print(f'\nInitializing {name} Processor...')
+                print(f"Processing data: {data}")
+                print(f'Validation: {name} data verified')
+                result = process.process(data)
+                print(process.format_output(result))
+                break
+    print("\n=== Polymorphic Processing Demo ===")

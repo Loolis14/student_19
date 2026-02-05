@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 
-def garden_operations():
+"""Second Exercise."""
+
+
+def garden_operations() -> None:
+    """Test error on garden."""
     print("\nTesting ValueError...")
     try:
         int("abc")
@@ -34,7 +38,8 @@ def garden_operations():
         print("Caught an error, but program continues!")
 
 
-def test_error_types():
+def test_error_types() -> None:
+    """Test the garden operation function."""
     garden_operations()
     print("\nAll error types tested successfully!")
 

@@ -1,21 +1,34 @@
 #!/usr/bin/env python3
 
+"""Third Exercise."""
+
+
 class GardenError(Exception):
+    """Alerte on garden error."""
+
     def __init__(self, message):
+        """Initialize a garden error."""
         super().__init__(message)
 
 
 class PlantError(GardenError):
+    """Alerte on plant error."""
+
     def __init__(self, message):
+        """Initialize a plant error."""
         super().__init__(message)
 
 
 class WaterError(GardenError):
+    """Alerte on water error."""
+
     def __init__(self, message):
+        """Initialize a water error."""
         super().__init__(message)
 
 
-def check_plant_error():
+def check_plant_error() -> None:
+    """Test if the plant name error works."""
     print("Testing PlantError...")
     try:
         raise PlantError("The tomato plant is wilting!")
@@ -23,7 +36,8 @@ def check_plant_error():
         print(f"Caught PlantError: {e}")
 
 
-def check_water_error():
+def check_water_error() -> None:
+    """Test if the water name error works."""
     print("Testing WaterError...")
     try:
         raise WaterError("Not enough water in the tank!")
