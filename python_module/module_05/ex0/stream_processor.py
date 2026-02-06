@@ -9,35 +9,43 @@ from typing import Any, List
 class DataProcessor(ABC):
     """Define common interface for all subclasses."""
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Initialize an abstract class."""
         super().__init__()
 
     @abstractmethod
     def process(self, data: Any) -> str:
+        """Initiliaze an abstract method."""
         pass
 
     @abstractmethod
     def validate(self, data: Any) -> bool:
+        """Initiliaze an abstract method."""
         pass
 
     def format_output(self, result: Any) -> str:
+        """Format output for child class"""
         return f"Output: {result}"
 
 
 class NumericProcessor(DataProcessor):
     """Process numeric data."""
 
-    def process(self, data: List) -> str:
+    def process(self, data: List[int]) -> str:
+        if not data:
+            return "No numeric values to process"
         lenght: int = len(data)
         sum_: int = sum(data)
         average: int = sum_ / lenght
         return f"Processed {lenght} numeric values, sum={sum_}, avg={average}"
 
     def validate(self, data: Any) -> bool:
-        for n in data:
-            if not isinstance(n, int):
-                return False
-        return True
+        try:
+            for n in data:
+                _ = n + 0
+            return True
+        except Exception:
+            return False
 
     def format_output(self, result: str) -> str:
         return f"Output: {result}"
@@ -47,14 +55,18 @@ class TextProcessor(DataProcessor):
     """Process text data."""
 
     def process(self, data: str) -> str:
+        if not data:
+            return "No text values to process"
         char_ = len(data)
         word = len(data.split())
         return f"Processed text: {char_} characters, {word} words"
 
     def validate(self, data: str) -> bool:
-        if isinstance(data, str):
+        try:
+            data.split()
             return True
-        return False
+        except Exception:
+            return False
 
     def format_output(self, result: str) -> str:
         return f"Output: {result}"
@@ -68,9 +80,11 @@ class LogProcessor(DataProcessor):
         return f'[{log[0]}] {log[0]} level detected: {" ".join(log[1:])}'
 
     def validate(self, data: str) -> bool:
-        if not isinstance(data, str):
+        try:
+            first_word = data.split()[0]
+        except Exception:
             return False
-        if data.split()[0] in ["ERROR", "INFO", "WARN", "DEBUG"]:
+        if first_word in ["ERROR", "INFO", "WARN", "DEBUG"]:
             return True
         return False
 
