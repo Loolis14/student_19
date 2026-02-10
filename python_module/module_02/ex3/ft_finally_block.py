@@ -37,7 +37,7 @@ class WateringSystem:
     @classmethod
     def opening_system(cls) -> None:
         """Open the watering system."""
-        WateringSystem.count_opening += 1
+        cls.count_opening += 1
 
     @classmethod
     def closing_system(cls) -> None:

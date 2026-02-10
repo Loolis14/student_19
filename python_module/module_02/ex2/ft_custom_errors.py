@@ -5,26 +5,17 @@
 
 class GardenError(Exception):
     """Alerte on garden error."""
-
-    def __init__(self, message):
-        """Initialize a garden error."""
-        super().__init__(message)
+    pass
 
 
 class PlantError(GardenError):
     """Alerte on plant error."""
-
-    def __init__(self, message):
-        """Initialize a plant error."""
-        super().__init__(message)
+    pass
 
 
 class WaterError(GardenError):
     """Alerte on water error."""
-
-    def __init__(self, message):
-        """Initialize a water error."""
-        super().__init__(message)
+    pass
 
 
 def check_plant_error() -> None:

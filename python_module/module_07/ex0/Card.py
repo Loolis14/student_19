@@ -2,6 +2,8 @@
 
 from abc import abstractmethod, ABC
 
+"""Mettre la valeur de mana en enum ?"""
+
 
 class Card(ABC):
     def __init__(self, name: str, cost: int, rarity: str) -> None:
@@ -21,6 +23,6 @@ class Card(ABC):
         return info
 
     def is_playable(self, available_mana: int) -> bool:
-        if available_mana > 0:
+        if available_mana > 5:
             return True
         return False
