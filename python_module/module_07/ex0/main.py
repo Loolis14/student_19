@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from CreatureCard import CreatureCard
+from .CreatureCard import CreatureCard
 
 if __name__ == "__main__":
     print("=== DataDeck Card Foundation ===")

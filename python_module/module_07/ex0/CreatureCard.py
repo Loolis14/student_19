@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from Card import Card
+from .Card import Card
 
 
 class CreatureCard(Card):
