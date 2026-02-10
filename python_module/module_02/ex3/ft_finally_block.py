@@ -16,9 +16,9 @@ class Plant():
 
 
 class PlantNameError(Exception):
-    """Define a plant name error"""
+    """Define a plant name error."""
 
-    def __init__(self, message):
+    def __init__(self, message: str) -> None:
         """Initialize a plant name error."""
         super().__init__(message)
         self.message = message
@@ -53,27 +53,27 @@ class WateringSystem:
         else:
             return "\nYou failed!"
 
-
-def water_plants(plant_list: list) -> None:
-    """Create and Water each plant in the garden."""
-    WateringSystem.opening_system()
-    try:
-        for plant in plant_list:
-            plante = Plant(plant)
-            print(f"Watering {plante.name}")
-        print("Watering completed successfully!")
-    except PlantNameError as e:
-        print(e)
-    finally:
-        WateringSystem.closing_system()
+    @classmethod
+    def water_plants(cls, plant_list: list) -> None:
+        """Create and Water each plant in the garden."""
+        cls.opening_system()
+        try:
+            for plant in plant_list:
+                plante = Plant(plant)
+                print(f"Watering {plante.name}")
+            print("Watering completed successfully!")
+        except PlantNameError as e:
+            print(e)
+        finally:
+            cls.closing_system()
 
 
 if __name__ == "__main__":
     print("=== Garden Watering System ===")
     print("\nTesting normal watering...")
     plant_list: list = ["tomato", "lettuce", "carrots"]
-    water_plants(plant_list)
+    WateringSystem.water_plants(plant_list)
     plant_list = ["tomato", None]
     print("\nTesting with error...")
-    water_plants(plant_list)
+    WateringSystem.water_plants(plant_list)
     print(WateringSystem.get_state())
