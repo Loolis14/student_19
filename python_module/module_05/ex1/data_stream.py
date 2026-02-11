@@ -92,7 +92,7 @@ class TransactionStream(DataStream):
                 elif key == 'sell':
                     self.money += value
                     result.append(f'sell:{value}')
-        return f"Processing transaction batch: {", ".join(result)}"
+        return f'Processing transaction batch: {", ".join(result)}"'
 
     def filter_data(self, data_batch: List[Any],
                     criteria: Optional[str] = None) -> List[Any]:
@@ -200,8 +200,8 @@ if __name__ == "__main__":
     event = EventStream("EVENT_001")
     print(event.process_batch(event_data))
     event_stats = event.get_stats()
-    print(f'Event analysis: {event_stats['processed']} events, '
-          f'{event_stats['error']} error detected')
+    print(f"Event analysis: {event_stats['processed']} events, "
+          f"{event_stats['error']} error detected")
 
     print("\n=== Polymorphic Stream Processing ===")
     print("Processing mixed stream types through unified interface...")

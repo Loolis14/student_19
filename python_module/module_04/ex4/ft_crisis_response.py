@@ -23,7 +23,7 @@ if __name__ == "__main__":
     try:
         print(
             "\nROUTINE ACCESS: Attempting access to 'standard_archive.txt'...")
-        with open("../standard_archive.txt", "r") as f:
+        with open("standard_archive.txt", "r") as f:
             f.read()
             print("SUCCESS: Archive recovered")
     except Exception:

@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
+"""Second Exercise."""
+
 import sys
-from typing import List
 
 
-def get_scores(args: List[str]) -> List[int] | None:
-    """create an int list of scores"""
-    score: List = []
+def get_scores(args: list[str]) -> list[int]:
+    """Get scores."""
+    score: list[int] = []
     for arg in args:
         try:
             score.append(int(arg))
@@ -29,7 +30,7 @@ if __name__ == "__main__":
             print(f"Scores processed: {score}")
             print(f"Total players: {len(score)}")
             print(f"Total score: {sum(score)}")
-            print(f"Average score: {sum(score) / len(score)}")
+            print(f"Average score: {sum(score) / len(score):.1f}")
             print(f"High score: {max(score)}")
             print(f"Low score: {min(score)}")
             print(f"Score range: {max(score) - min(score)}")

@@ -1,32 +1,26 @@
 #!/usr/bin/env python3
 
-from typing import List, Tuple
-
-
-class PlayerError(Exception):
-    """To handle error if no name is given"""
-    pass
+"""Fourth Exercise."""
 
 
 class AchievementHunter:
-    """create and manage players and their achievements"""
-    players: List["AchievementHunter"] = []
+    """Create and manage players and their achievements."""
+
+    players: list["AchievementHunter"] = []
 
     def __init__(self, name: str) -> None:
-        """Initalisation of a player"""
-        if not name:
-            raise PlayerError("No name given")
+        """Initalisation of a player."""
         self.name: str = name
-        self.players.append(self)
-        self.achievements: Tuple[str] = set()
+        AchievementHunter.players.append(self)
+        self.achievements: set[str] = set()
 
-    def add_achievement(self, *args: List[str]) -> None:
-        """To add achievement(s) to a player"""
+    def add_achievement(self, args: tuple[str]) -> None:
+        """Add achievement(s) to a player."""
         self.achievements.update(args)
 
-    def unique_by_player(self) -> Tuple[str]:
-        """Achievement unlock juste by self"""
-        others: Tuple[str] = set()
+    def unique_by_player(self) -> set[str]:
+        """Print achievement unlock juste by self."""
+        others: set[str] = set()
         for player in AchievementHunter.players:
             if player.name == self.name:
                 continue
@@ -34,16 +28,16 @@ class AchievementHunter:
         return self.achievements - others
 
     def print_unique_by_player(self) -> None:
-        """To print the unique achievement for the chosen player"""
-        unique: Tuple[str] = self.unique_by_player()
-        if unique == set():
+        """Print the unique achievement for the chosen player."""
+        unique: set[str] = self.unique_by_player()
+        if not unique:
             print(f"{self.name.capitalize()} has no unique achievement yet")
         else:
             print(f"{self.name.capitalize()} unique: {unique}")
 
     @classmethod
-    def achivement_tracker_system(cls) -> None:
-        """To print all achievements every player has"""
+    def achievement_tracker_system(cls) -> None:
+        """Print all achievements every player has."""
         print("=== Achievement Tracker System ===\n")
         for player in cls.players:
             if not player.achievements:
@@ -55,8 +49,8 @@ class AchievementHunter:
 
     @classmethod
     def unique_achievement(cls) -> None:
-        """print all unique achievements"""
-        unique: Tuple[str] = set()
+        """Print all unique achievements."""
+        unique: set[str] = set()
         for player in cls.players:
             unique = unique.union(player.achievements)
         print(f"All unique achievements: {unique}")
@@ -64,16 +58,16 @@ class AchievementHunter:
 
     @classmethod
     def common_achievement(cls) -> None:
-        """Achievement unlock by all players"""
-        common: Tuple[str] = cls.players[0].achievements
+        """Print achievement unlock by all players."""
+        common: set[str] = cls.players[0].achievements
         for player in cls.players[1:]:
             common = common.intersection(player.achievements)
         print(f"Common to all players: {common}")
 
     @classmethod
     def rare_achievement(cls) -> None:
-        """All achievements obtained by one player"""
-        rare: Tuple[str] = set()
+        """Print all achievements obtained by one player."""
+        rare: set[str] = set()
         for player in cls.players:
             rare |= player.unique_by_player()
         print(f"Rare achievements (1 player): {rare}")
@@ -81,16 +75,16 @@ class AchievementHunter:
     @staticmethod
     def common_compare(player1: "AchievementHunter",
                        player2: "AchievementHunter") -> str:
-        """To print what achievement two players has in commom"""
-        common: Tuple[str] = player1.achievements & player2.achievements
+        """Print what achievement two players has in commom."""
+        common: set[str] = player1.achievements & player2.achievements
         return (
             f"{player1.name.capitalize()} vs {player2.name.capitalize()} "
             f"common: {common}")
 
 
 def tests():
-    """to test functions built on AchievementHunter class"""
-    AchievementHunter.achivement_tracker_system()
+    """Test functions built on AchievementHunter class."""
+    AchievementHunter.achievement_tracker_system()
     print("\n=== Achievement Analytics ===")
     AchievementHunter.unique_achievement()
     print()
@@ -110,10 +104,10 @@ if __name__ == "__main__":
     charlie = AchievementHunter("charlie")
 
     # add achievements to player
-    alice.add_achievement('first_kill', 'level_10',
-                          'treasure_hunter', 'speed_demon')
-    bob.add_achievement('first_kill', 'level_10',
-                        'boss_slayer', 'collector')
-    charlie.add_achievement('level_10', 'treasure_hunter',
-                            'boss_slayer', 'speed_demon', 'perfectionist')
+    alice.add_achievement(('first_kill', 'level_10',
+                          'treasure_hunter', 'speed_demon'))
+    bob.add_achievement(('first_kill', 'level_10',
+                        'boss_slayer', 'collector'))
+    charlie.add_achievement(('level_10', 'treasure_hunter',
+                            'boss_slayer', 'speed_demon', 'perfectionist'))
     tests()

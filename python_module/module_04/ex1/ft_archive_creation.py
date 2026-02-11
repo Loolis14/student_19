@@ -4,26 +4,27 @@ if __name__ == "__main__":
     print("=== CYBER ARCHIVES- PRESERVATION SYSTEM ===\n")
     file = "new_discovery.txt"
     print(f"Initializing new storage unit: {file}")
+    f = None
     try:
         f = open(file, "w")
-        f.write("quantum algorithm breakthrough !!\n")
-        f.write("performance improvement metrics (347%_ efficiency gain)\n")
-        f.write("Archived by mmeurer trainee")
+        f.write("[ENTRY 001] quantum algorithm breakthrough !!\n")
+        f.write("[ENTRY 002] performance improvement metrics (347%_ efficiency gain)\n")
+        f.write("[ENTRY 003] Archived by mmeurer trainee")
         print("Storage unit created successfully...")
     except Exception as e:
         print(f"Erreur lors de l'écriture du fichier: {e}")
+
     try:
         f = open(file, "r")
-        contenu = f.readlines()
+        contenu = f.read()
         print("\nInscribing preservation data...")
-        entry = 1
-        for line in contenu:
-            line = line.rstrip("\n")
-            print(f"[ENTRY 00{entry}] {line}")
-            entry += 1
+        f = open(file, "r")
+        content = f.read()
+        print(content, end="")
     except Exception as e:
         print(f"Erreur lors de la lecture du fichier: {e}")
     finally:
-        f.close()
+        if f:
+            f.close()
         print("\nData inscription complete. Storage unit sealed.")
         print(f"Archive '{file}' ready for long-term preservation.")

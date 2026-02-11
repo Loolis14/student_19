@@ -1,17 +1,20 @@
 #!/usr/bin/env python3
 
-from typing import List, Dict, Set
+"""Seventh Exercise."""
 
 
 class Player:
-    score_categorie: Dict = {
+    """Define a player and his stats."""
+
+    score_categorie: dict[str, int] = {
         "novice": 0,
         "expert": 0,
         "démoniaque": 0
     }
-    players: List = []
+    players: list["Player"] = []
 
-    def __init__(self, name, region):
+    def __init__(self, name: str, region: str) -> None:
+        """Initialize a player."""
         self.name = name
         self.achievements = []
         self.region = region
@@ -20,12 +23,14 @@ class Player:
         Player.score_categorie[self.score_categorie] += 1
         Player.players.append(self)
 
-    def add_achievements(self, achievements):
+    def add_achievements(self, achievements: list[str]) -> None:
+        """Add achievements to a player."""
         self.achievements += achievements
 
-    def add_score(self, n):
+    def add_score(self, n: int) -> None:
+        """Add score to a player."""
         self.score += n
-        if 10 < self.score < 30:
+        if 10 < self.score < 39:
             Player.score_categorie["novice"] -= 1
             Player.score_categorie["expert"] += 1
         elif 39 < self.score:
@@ -52,9 +57,9 @@ if __name__ == "__main__":
     charlie.add_achievements(['fishing'])
 
     print("\n=== List Comprehension Examples ===")
-    high_scorers: List = []
-    doubled: List = []
-    active_players: List = []
+    high_scorers: list[int] = []
+    doubled: list[int] = []
+    active_players: list[str] = []
     for player in Player.players:
         doubled.append(player.score * 2)
         active_players.append(player.name)
@@ -65,8 +70,8 @@ if __name__ == "__main__":
     print(f"Active players: {active_players}")
 
     print("\n=== Dict Comprehension Examples ===")
-    players_score: Dict = {}
-    count_achievements: Dict = {}
+    players_score: dict[str, int] = {}
+    count_achievements: dict[str, int] = {}
     for player in Player.players:
         players_score[player.name] = player.score
         count_achievements[player.name] = len(player.achievements)
@@ -75,12 +80,12 @@ if __name__ == "__main__":
     print(f"Achievement counts: {count_achievements}")
 
     print("\n=== Set Comprehension Examples ===")
-    unique_player: Set = set()
-    unique_achievements: Set = {ach
-                                for player in Player.players
-                                for ach in player.achievements}
-    active_regions: Set = {player.region
-                           for player in Player.players}
+    unique_player: set[str] = set()
+    unique_achievements: set[str] = {ach for player in
+                                     Player.players for ach in
+                                     player.achievements}
+    active_regions: set[str] = {player.region
+                                for player in Player.players}
     for player in Player.players:
         unique_player.add(player.name)
     print(f'Unique players: {unique_player}')
@@ -92,7 +97,7 @@ if __name__ == "__main__":
     print(f'Total unique achievements: {len(unique_achievements)}')
     print(f'Average score: '
           f'{sum(players_score.values()) / len(players_score): .2f}')
-    max_ = max(players_score.values())
+    max_: int = max(players_score.values())
     for player in Player.players:
         if player.score == max_:
             print(f'Top performer: {player.name} '

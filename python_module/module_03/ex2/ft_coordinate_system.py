@@ -1,26 +1,27 @@
 #!/usr/bin/env python3
 
+"""Third Exercise."""
+
 import math
-from typing import Tuple, List
 
 
-def create_position(x: int, y: int, z: int) -> Tuple[int, int, int]:
+def create_position(x: int, y: int, z: int) -> tuple[int, int, int]:
     """Create a 3D position tuple."""
     position = (x, y, z)
     print(f"Position created: {position}")
     return position
 
 
-def distance(position: Tuple[int, int, int]) -> None:
+def distance(position: tuple[int, int, int]) -> None:
     """Print distance from origin to a position."""
     x, y, z = position
     d = math.sqrt(x**2 + y**2 + z**2)
     print(f"Distance between (0, 0, 0) and {position}: {d:.2f}")
 
 
-def parse_coordinates(coord_str: str) -> Tuple[int, int, int]:
+def parse_coordinates(coord_str: str) -> tuple[int, int, int]:
     """Transform an arg in a tuple of coordinates."""
-    coordinates: List = []
+    coordinates: list[int] = []
     for arg in coord_str.split(","):
         try:
             int(arg)
@@ -35,15 +36,7 @@ def parse_coordinates(coord_str: str) -> Tuple[int, int, int]:
     return (*coordinates,)
 
 
-def parse_coordinates_2(coord_str: str) -> Tuple[int, int, int]:
-    """Parse a string like '3,4,0' into a tuple of integers."""
-    parts = [int(x) for x in coord_str.split(",")]
-    if len(parts) != 3:
-        raise ValueError("Coordinates must have 3 values (x,y,z)")
-    return tuple(parts)
-
-
-def unpack_coordinates(position: Tuple[int, int, int]) -> None:
+def unpack_coordinates(position: tuple[int, int, int]) -> None:
     """Demonstrate tuple unpacking."""
     x, y, z = position
     print(f"Player at x={x}, y={y}, z={z}")
