@@ -1,23 +1,24 @@
-from ex0.Card import Card
 from ex0.CreatureCard import CreatureCard
-from SpellCard import SpellCard
-from ArtifactCard import ArtifactCard
-from Deck import Deck
+from ex1.SpellCard import SpellCard
+from ex1.ArtifactCard import ArtifactCard
+from ex0.Card import Rarity
+from ex1.Deck import Deck
 
 if __name__ == "__main__":
     print("\n=== DataDeck Deck Builder ===")
     print("\nBuilding deck with different card types...")
-    creature = CreatureCard("Fire Dragon", 5, "legendary")
-    spell = SpellCard("Lightning Bolt", 3, "common")
+    creature = CreatureCard("Fire Dragon", 5, Rarity.LEGENDARY, 5, 7)
+    spell = SpellCard("Lightning Bolt", 3, Rarity.COMMON,
+                      'Deal 3 damage to target')
     artificats: ArtifactCard = ArtifactCard("Mana Crystal", 2,
-                                            "legendary", 10,
+                                            Rarity.LEGENDARY, 10,
                                             "Permanent: +1 mana per turn")
     morgane_deck: Deck = Deck()
     morgane_deck.add_card(creature)
     morgane_deck.add_card(spell)
-    
-    print(len(Deck.cards))
+    morgane_deck.add_card(artificats)
 
+    print(f'Deck stats: {morgane_deck.get_deck_stats()}')
 
 """
 Building deck with different card types...

@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 
-from .CreatureCard import CreatureCard
+from ex0.CreatureCard import CreatureCard
+from ex0.Card import Rarity
 
 if __name__ == "__main__":
     print("=== DataDeck Card Foundation ===")
     print("\nTesting Abstract Base Class Design:")
-    dragon: CreatureCard = CreatureCard('Fire Dragon', 5, 'Legendary', 5, 7)
+    dragon: CreatureCard = CreatureCard('Fire Dragon', 5,
+                                        Rarity.LEGENDARY, 5, 7)
     print(f'CreatureCard Info: {dragon.get_card_info()}')
     print("\nPlaying Fire Dragon with 6 mana available:")
     print(f"Playable: {dragon.is_playable(6)}")

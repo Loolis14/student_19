@@ -2,14 +2,13 @@
 
 from abc import abstractmethod, ABC
 from enum import Enum
-"""Mettre la valeur de mana en enum ?"""
 
 
 class Card(ABC):
     def __init__(self, name: str, cost: int, rarity: str) -> None:
         self.name = name
         self.cost = cost
-        self.rarity = Rarity(rarity)
+        self.rarity = rarity.value
 
     @abstractmethod
     def play(self, game_state: dict) -> dict:
@@ -19,7 +18,7 @@ class Card(ABC):
         return {
             'name': self.name,
             'cost': self.cost,
-            'rarity': self.rarity.name.capitalize()
+            'rarity': self.rarity
             }
 
     def is_playable(self, available_mana: int) -> bool:
@@ -28,4 +27,4 @@ class Card(ABC):
 
 class Rarity(Enum):
     LEGENDARY = "legendary"
-    COMMON = 2
+    COMMON = "common"
