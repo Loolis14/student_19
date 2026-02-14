@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+"""Third exercise."""
+
 import sys
 
 if __name__ == "__main__":

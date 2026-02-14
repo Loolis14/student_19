@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
+"""First exercise."""
 
 if __name__ == "__main__":
-    print("=== CYBER ARCHIVES- DATA RECOVERY SYSTEM ===\n")
+    print("=== CYBER ARCHIVES - DATA RECOVERY SYSTEM ===\n")
     file = "ancient_fragment.txt"
     print(f"Accessing Storage Vault: {file}")
     f = None
@@ -11,10 +12,9 @@ if __name__ == "__main__":
         print("Connection established...")
         contenu = f.read()
         print(f"\nRECOVERED DATA:\n{contenu}")
-        
-    except Exception as e:
-        print(f"Erreur lors de la lecture du fichier: {e}")
+        f.close()
+    except FileNotFoundError:
+        print("ERROR: Storage vault not found.")
     finally:
-        if f:
-            f.close()
-        print("\nData recovery complete. Storage unit disconnected.")
+        if f and f.closed:
+            print("\nData recovery complete. Storage unit disconnected.")
