@@ -102,12 +102,13 @@ if __name__ == "__main__":
     ]
     for data in datas:
         for process in processor:
-            if process.validate(data):
-                name: str = process.__class__.__name__.replace("Processor", "")
-                print(f'\nInitializing {name} Processor...')
-                print(f"Processing data: {data}")
-                print(f'Validation: {name} data verified')
-                result = process.process(data)
-                print(process.format_output(result))
-                break
+            if not process.validate(data):
+                continue
+            name: str = process.__class__.__name__.replace("Processor", "")
+            print(f'\nInitializing {name} Processor...')
+            print(f"Processing data: {data}")
+            print(f'Validation: {name} data verified')
+            result = process.process(data)
+            print(process.format_output(result))
+            break
     print("\n=== Polymorphic Processing Demo ===")
