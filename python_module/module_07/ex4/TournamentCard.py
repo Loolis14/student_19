@@ -14,8 +14,8 @@ class TournamentCard (Card, Combatable, Rankable):
         self.defense: int = defense
         self.mana: int = 6
         self.id = id_
-        self.rating = rating
         self.record = {'win': 0, 'lose': 0}
+        self.rating = rating
 
     def play(self, game_state: dict) -> dict:
         if not self.is_playable(game_state['mana']):
@@ -62,9 +62,11 @@ class TournamentCard (Card, Combatable, Rankable):
 
     def update_wins(self, wins: int) -> None:
         self.record['win'] += wins
+        self.rating += self.calculate_rating()
 
     def update_losses(self, losses: int) -> None:
         self.record['lose'] += losses
+        self.rating += self.calculate_rating()
 
     def get_rank_info(self) -> dict:
         return {

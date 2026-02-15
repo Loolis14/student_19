@@ -35,7 +35,7 @@ class FantasyCardFactory(CardFactory):
         """Creates spell cards."""
         if name_or_power == 'lightning':
             lightning = SpellCard('Lightning Bolt', 3,
-                                  Rarity.LEGENDARY, 'damage')
+                                  Rarity.LEGENDARY, '+3 damage')
             self.cards.append(lightning)
             return lightning
         elif name_or_power == 'fireball':

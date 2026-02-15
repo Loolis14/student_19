@@ -18,35 +18,21 @@ class GameEngine():
         self.strategy = strategy
 
     def simulate_turn(self) -> dict:
-        """Hand: [Fire Dragon (5), Goblin Warrior (2), Lightning Bolt (3)]
-Turn execution:
-Strategy: AggressiveStrategy
-Actions: {'cards_played': ['Goblin Warrior'
-,
-'Lightning Bolt'],
-'mana_used': 5,'targets_attacked': ['Enemy Player'],
-'damage_dealt': 8}"""
-        self.turn += 1
+        """Simulate a turn."""
         enemy = ['Enemy Player']
-        card_played = self.strategy.execute_turn(self.hand, enemy)
-        mana_used = sum(card.cost for card in card_played)
-        dmg: int = 0
-        for card in card_played:
-            if card.__class__.__name__ == "CreatureCard":
-                dmg += card.attack
-        return {
-            'cards_played': card_played,
-            'mana_used': mana_used,
-            'targets_attacked': enemy,
-            'damage_dealt': dmg
+        result = {
+            'strategy': self.strategy.get_strategy_name(),
+            'actions': self.strategy.execute_turn(self.hand, enemy)
         }
+        self.turn += 1
+        self.total_damage = result['actions']['damage_dealt']
+        return result
 
     def get_engine_status(self) -> dict:
         """Get the status of the engine."""
         return {
-            'Factory': self.factory.__class__.__name__,
-            'Strategy': self.strategy.get_strategy_name(),
             'turns_simulated': self.turn,
-            'total_damage': 8,
+            'strategy_used': self.strategy.get_strategy_name(),
+            'total_damage': self.total_damage,
             'cards_created': len(self.hand)
         }
