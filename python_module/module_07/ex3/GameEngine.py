@@ -1,5 +1,5 @@
-from ex3.CardFactory import CardFactory
-from ex3.GameStrategy import GameStrategy
+from ex3 import CardFactory, GameStrategy
+from ex0.Card import Card
 
 
 class GameEngine():
@@ -8,6 +8,8 @@ class GameEngine():
     def __init__(self):
         """Initialize the beginning of the game."""
         self.turn: int = 0
+        self.hand: list[Card] = []
+        self.total_damage: int = 0
 
     def configure_engine(self, factory: CardFactory,
                          strategy: GameStrategy) -> None:
@@ -24,22 +26,27 @@ Actions: {'cards_played': ['Goblin Warrior'
 'Lightning Bolt'],
 'mana_used': 5,'targets_attacked': ['Enemy Player'],
 'damage_dealt': 8}"""
-        enemy = ['Enemy Player']
-        r = {
-            'actions': self.strategy.execute_turn(self.deck, enemy)
-        }
         self.turn += 1
-        self.total_damage = r['actions']['damage']
+        enemy = ['Enemy Player']
+        card_played = self.strategy.execute_turn(self.hand, enemy)
+        mana_used = sum(card.cost for card in card_played)
+        dmg: int = 0
+        for card in card_played:
+            if card.__class__.__name__ == "CreatureCard":
+                dmg += card.attack
         return {
-            'cards_played': ['Goblin Warrior', 'Lightning Bolt'],
-            'mana_used': 5,
+            'cards_played': card_played,
+            'mana_used': mana_used,
             'targets_attacked': enemy,
-            'damage_dealt': self.total_damage
+            'damage_dealt': dmg
         }
 
     def get_engine_status(self) -> dict:
         """Get the status of the engine."""
         return {
             'Factory': self.factory.__class__.__name__,
-            'Strategy': self.strategy.get_strategy_name()
+            'Strategy': self.strategy.get_strategy_name(),
+            'turns_simulated': self.turn,
+            'total_damage': 8,
+            'cards_created': len(self.hand)
         }

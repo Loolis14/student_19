@@ -3,10 +3,11 @@ from ex3.FantasyCardFactory import FantasyCardFactory
 from ex3.GameEngine import GameEngine
 
 
-def create_factory(factory: FantasyCardFactory) -> None:
+def create_factory(factory: FantasyCardFactory, engine: GameEngine) -> None:
     factory.create_creature("dragon")
     factory.create_creature("goblin")
     factory.create_spell('lightning')
+    engine.hand = factory.cards
 
 
 if __name__ == "__main__":
@@ -24,7 +25,7 @@ if __name__ == "__main__":
 
     print("Configuring Fantasy Card Game...")
     print(f'Available types: {my_factory.get_supported_types()}')
-    create_factory(my_factory)
+    create_factory(my_factory, engine)
 
     print("\nSimulating aggressive turn...")
     hand = []
@@ -34,7 +35,8 @@ if __name__ == "__main__":
 
     print("\nTurn execution:")
     print(f"Strategy: {engine.strategy.__class__.__name__}")
-    print(engine.simulate_turn())
+    # print(engine.simulate_turn())
+    print(engine.hand)
 
 """
 Simulating aggressive turn...
