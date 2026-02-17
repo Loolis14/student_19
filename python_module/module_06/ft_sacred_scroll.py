@@ -6,18 +6,31 @@ import alchemy
 def test_elements():
     print("=== Sacred Scroll Mastery ===\n")
     print("Testing direct module access:")
-    print(alchemy.elements.create_fire())
-    print(alchemy.elements.create_water())
-    print(alchemy.elements.create_earth())
-    print(alchemy.elements.create_air())
-    print("\nTesting package-level access (controlled by __init__.py):")
+    print("alchemy.elements.create_fire():", alchemy.elements.create_fire())
+    print("alchemy.elements.create_water():",alchemy.elements.create_water())
+    print("alchemy.elements.create_earth():",alchemy.elements.create_earth())
+    print("alchemy.elements.create_air():",alchemy.elements.create_air())
 
-    for spell in ["create_fire", "create_water", "create_earth", "create_air"]:
-        try:
-            func = getattr(alchemy, spell)
-            print(func())
-        except AttributeError:
-            print(f"{spell}: AttributeError - not exposed")
+    print("\nTesting package-level access (controlled by __init__.py):")
+    try:
+        print("alchemy.create_fire():", alchemy.create_fire())
+    except AttributeError:
+        print("alchemy.create_fire(): AttributeError - not exposed")
+
+    try:
+        print("alchemy.create_water():", alchemy.create_water())
+    except AttributeError:
+        print("alchemy.create_water(): AttributeError - not exposed")
+
+    try:
+        print("alchemy.create_earth():", alchemy.create_earth())
+    except AttributeError:
+        print("alchemy.create_earth(): AttributeError - not exposed")
+
+    try:
+        print("alchemy.create_air():", alchemy.create_air())
+    except AttributeError:
+        print("alchemy.create_air(): AttributeError - not exposed")
 
     print("\nPackage metadata:")
     print(f"Version: {alchemy.__version__}")

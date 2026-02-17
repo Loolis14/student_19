@@ -8,7 +8,7 @@ from alchemy import create_water
 def test_potions():
     print("=== Import Transmutation Mastery ===")
 
-    print("\nMethod 1- Full module import")
+    print("\nMethod 1- Full module import:")
     print(f"alchemy.elements.create_fire(): {elements.create_fire()}")
 
     print("\nMethod 2- Specific function import:")
