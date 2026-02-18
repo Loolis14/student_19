@@ -1,8 +1,11 @@
+"""Concrete class for agressive strategy."""
+
+
 class AggressiveStrategy():
     """Prioritizes attacking and dealing damage."""
 
     def execute_turn(self, hand: list, battlefield: list) -> dict:
-        """Returns comprehensive turn execution results."""
+        """Return comprehensive turn execution results."""
         targets = self.prioritize_targets(battlefield)
         mana_turn = 5
         mana_left = 5

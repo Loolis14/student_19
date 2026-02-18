@@ -1,3 +1,5 @@
+"""Tournament plateform class."""
+
 from ex0 import Card
 from ex4 import TournamentCard
 
@@ -6,10 +8,12 @@ class TournamentPlatform():
     """Manages the plateform tournament."""
 
     def __init__(self) -> None:
+        """Initialize tournament plateform with all cards."""
         self.cards: dict[str, Card] = {}
         self.match_played: int = 0
 
     def register_card(self, card: TournamentCard) -> str:
+        """Register card for tournaments."""
         self.cards[card.id] = card
         return (f"{card.name} (ID: {card.id}):\n"
                 f"- Interfaces: [Card, Combatable, Rankable]\n"
@@ -17,6 +21,7 @@ class TournamentPlatform():
                 f"- Record: {card.record['win']}-{card.record['lose']}\n")
 
     def create_match(self, card1_id: str, card2_id: str) -> dict:
+        """Create a match."""
         card1 = self.cards[card1_id]
         card2 = self.cards[card2_id]
         one_two = card2.defense - card1.attack_ + card2._health
@@ -53,6 +58,7 @@ class TournamentPlatform():
         return leaderboard
 
     def generate_tournament_report(self) -> dict:
+        """Generate tournament report."""
         return {
             'total_cards': len(self.cards),
             'matches_played': self.match_played,

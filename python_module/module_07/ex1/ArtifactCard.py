@@ -1,3 +1,5 @@
+"""Concret class for artifact cards."""
+
 from ex0.Card import Card
 
 
@@ -5,7 +7,7 @@ class ArtifactCard(Card):
     """Define an artifact who can influence on board."""
 
     def __init__(self, name: str, cost: int,
-                 rarity: str, durability: int, effect: str):
+                 rarity: str, durability: int, effect: str) -> None:
         """Initiliaze artifact card."""
         super().__init__(name, cost, rarity)
         self.durability: int = durability

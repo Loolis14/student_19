@@ -1,3 +1,5 @@
+"""Abstract class for magical card."""
+
 from abc import ABC, abstractmethod
 
 

@@ -1,3 +1,5 @@
+"""Fifth exercise main."""
+
 from ex0.Card import Rarity
 from ex4.TournamentCard import TournamentCard
 from ex4.TournamentPlatform import TournamentPlatform

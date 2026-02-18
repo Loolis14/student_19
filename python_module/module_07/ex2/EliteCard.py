@@ -1,4 +1,6 @@
-from ex0.Card import Card
+"""Concret class for elite card."""
+
+from ex0.Card import Card, Rarity
 from ex2.Magical import Magical
 from ex2.Combatable import Combatable
 
@@ -6,7 +8,9 @@ from ex2.Combatable import Combatable
 class EliteCard(Card, Combatable, Magical):
     """Generate an elite card."""
 
-    def __init__(self, name, cost, rarity, health, defense, attack_, mana):
+    def __init__(self, name: str, cost: int, rarity: Rarity,
+                 health: int, defense: int, attack_: int, mana: int) -> None:
+        """Initialize an elite card."""
         super().__init__(name, cost, rarity)
         self.health = health
         self.defense = defense
@@ -43,15 +47,15 @@ class EliteCard(Card, Combatable, Magical):
             'mana_used': self.magic[spell_name]
         }
 
-    def channel_mana(self, amount):
-        """Returns the mana used and the mana left."""
+    def channel_mana(self, amount: int) -> dict:
+        """Return the mana used and the mana left."""
         return {
             'channeled': amount,
             'total_mana': self.mana + amount
         }
 
     def defend(self, incoming_damage) -> dict:
-        """Returns the result of the attack."""
+        """Return the result of the attack."""
         damage_taken = (incoming_damage - self.defense
                         if incoming_damage - self.defense > 0 else 0)
         alive = True if damage_taken < self.health else False

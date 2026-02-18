@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+"""First exercise main."""
+
 from ex0.CreatureCard import CreatureCard
 from ex0.Card import Rarity
 

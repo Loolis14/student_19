@@ -1,3 +1,5 @@
+"""Abstract class for combatable card."""
+
 from abc import ABC, abstractmethod
 
 

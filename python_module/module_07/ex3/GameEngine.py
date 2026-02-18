@@ -1,3 +1,5 @@
+"""Game engine class."""
+
 from ex3 import CardFactory, GameStrategy
 from ex0.Card import Card
 

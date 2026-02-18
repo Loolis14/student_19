@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+"""Concret class for creature cards."""
 
 from .Card import Card
 
@@ -60,6 +60,7 @@ class CreatureCard(Card):
         }
 
     def get_card_info(self) -> dict:
+        """Get card info."""
         parent: dict = super().get_card_info()
         parent['attack'] = self.attack
         parent['health'] = self.health

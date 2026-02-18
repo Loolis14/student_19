@@ -1,9 +1,12 @@
+"""Fourth exercise main."""
+
 from ex3.AggressiveStrategy import AggressiveStrategy
 from ex3.FantasyCardFactory import FantasyCardFactory
 from ex3.GameEngine import GameEngine
 
 
 def create_factory(factory: FantasyCardFactory, engine: GameEngine) -> None:
+    """Create a factory with cards."""
     factory.create_creature("dragon")
     factory.create_creature("goblin")
     factory.create_spell('lightning')

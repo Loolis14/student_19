@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+"""Abstract class for cards."""
 
 from abc import abstractmethod, ABC
 from enum import Enum
@@ -19,7 +19,7 @@ class Card(ABC):
         pass
 
     def get_card_info(self) -> dict:
-        """Gives card info."""
+        """Give card info."""
         return {
             'name': self.name,
             'cost': self.cost,

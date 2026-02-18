@@ -1,3 +1,5 @@
+"""Define decks."""
+
 from ex0.Card import Card
 from typing import List
 import random
@@ -6,7 +8,8 @@ import random
 class Deck:
     """Manages cards."""
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Give a list of card in the deck."""
         self.cards: List[Card] = []
 
     def add_card(self, card: "Card") -> None:

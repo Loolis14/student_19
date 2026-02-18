@@ -1,10 +1,13 @@
+"""Third exercise main."""
+
 from ex0.Card import Card, Rarity
 from ex2.EliteCard import EliteCard
 from ex2.Magical import Magical
 from ex2.Combatable import Combatable
 
 
-def display_capabilities(obj):
+def display_capabilities(obj: EliteCard) -> None:
+    """Display methods that Elite card inherits."""
     parents = [Card, Combatable, Magical]
 
     print("EliteCard capabilities:")

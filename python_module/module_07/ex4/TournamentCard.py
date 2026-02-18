@@ -1,4 +1,6 @@
-from ex0.Card import Card
+"""Tournament card."""
+
+from ex0.Card import Card, Rarity
 from ex2.Combatable import Combatable
 from ex4.Rankable import Rankable
 
@@ -6,18 +8,21 @@ from ex4.Rankable import Rankable
 class TournamentCard (Card, Combatable, Rankable):
     """Tracks tournament performance with ranking updates."""
 
-    def __init__(self, name, cost, rarity,
-                 health, attack_, defense, id_, rating):
+    def __init__(self, name: str, cost: int, rarity: Rarity,
+                 health: int, attack_: int, defense: int,
+                 id_: str, rating: int):
+        """Initialize cards for tournament."""
         super().__init__(name, cost, rarity)
-        self._health: int = health
-        self.attack_: int = attack_
-        self.defense: int = defense
-        self.mana: int = 6
+        self._health = health
+        self.attack_ = attack_
+        self.defense = defense
+        self.mana = 6
         self.id = id_
         self.record = {'win': 0, 'lose': 0}
         self.rating = rating
 
     def play(self, game_state: dict) -> dict:
+        """Play a turn."""
         if not self.is_playable(game_state['mana']):
             return {}
         game_state['mana'] -= self.cost
@@ -26,7 +31,8 @@ class TournamentCard (Card, Combatable, Rankable):
             'mana_used': self.cost,
         }
 
-    def attack(self, target) -> dict:
+    def attack(self, target: str) -> dict:
+        """Attack stats."""
         return {
             'attacker': self.name,
             'target': target,
@@ -35,9 +41,11 @@ class TournamentCard (Card, Combatable, Rankable):
         }
 
     def calculate_rating(self) -> int:
+        """Calculate the rating."""
         return 16 * self.record['win'] - 16 * self.record['lose']
 
     def get_tournament_stats(self) -> dict:
+        """Get tournament stats."""
         pass
 
     def defend(self, incoming_damage: int) -> dict:
@@ -61,14 +69,17 @@ class TournamentCard (Card, Combatable, Rankable):
         }
 
     def update_wins(self, wins: int) -> None:
+        """Update rating when winning."""
         self.record['win'] += wins
         self.rating += self.calculate_rating()
 
     def update_losses(self, losses: int) -> None:
+        """Update rating when losing."""
         self.record['lose'] += losses
         self.rating += self.calculate_rating()
 
     def get_rank_info(self) -> dict:
+        """Get rank info."""
         return {
             'name': self.name,
             'rating': self.rating,

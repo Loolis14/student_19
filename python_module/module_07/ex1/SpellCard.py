@@ -1,8 +1,14 @@
+"""Concret class for spell cards."""
+
 from ex0.Card import Card
 
 
 class SpellCard(Card):
-    def __init__(self, name: str, cost: int, rarity: str, effect_type: str):
+    """Class for spell cards."""
+
+    def __init__(self, name: str, cost: int,
+                 rarity: str, effect_type: str) -> None:
+        """Initialize spell cards."""
         super().__init__(name, cost, rarity)
         self.effect_type: str = effect_type
 
