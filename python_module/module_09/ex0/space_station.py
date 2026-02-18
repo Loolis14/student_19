@@ -71,13 +71,14 @@ class SpaceStation(BaseModel):
 
 def main() -> None:
     try:
-        station = SpaceStation(station_id = "ic")
+        station = SpaceStation(station_id="ic")
     except Exception as e:
-        print(f"L'Oracle refuse : {e}")
+        print(e)
+
 
 if __name__ == "__main__":
     main()
-• Creates a valid space station instance
+""" • Creates a valid space station instance
 • Displays the station information clearly
 • Attempts to create an invalid station (e.g., crew_size > 20)
-• Shows the validation error message
+• Shows the validation error message """
