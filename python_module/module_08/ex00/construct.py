@@ -18,11 +18,11 @@ def venv_not_activated() -> None:
 
     print("To enter the construct, run:")
     print("python3 -m venv matrix_env")
-    print("source matrix_env/bin/activate # On Unix")
+    print("source matrix_env/bin/activate  # On Unix")
     print("matrix_env")
     print("Scripts")
-    print("activate # On Windows")
-    print("Then run this program again.")
+    print("activate     # On Windows")
+    print("\nThen run this program again.")
 
 
 def venv_activated() -> None:
@@ -31,13 +31,13 @@ def venv_activated() -> None:
     venv_name = os.path.basename(venv_root)
     site_packages = site.getsitepackages()[0]
 
-    print("MATRIX STATUS: Welcome to the construct\n"
-          f"Current Python: {sys.executable}\n"
-          f"Virtual Environment: {venv_name}\n"
-          f"Environment Path: {venv_root}\n"
-          "SUCCESS: You're in an isolated environment!\n"
-          "Safe to install packages without affecting the global system.\n"
-          f"Package installation path:\n {site_packages}")
+    print("\nMATRIX STATUS: Welcome to the construct\n")
+    print(f"Current Python: {sys.executable}") 
+    print(f"Virtual Environment: {venv_name}")
+    print(f"Environment Path: {venv_root}")
+    print("\nSUCCESS: You're in an isolated environment!\n"
+          "Safe to install packages without affecting the global system.\n")
+    print(f"Package installation path:\n {site_packages}")
 
 
 def is_venv() -> bool:
