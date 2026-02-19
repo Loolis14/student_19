@@ -1,19 +1,16 @@
 #!/usr/bin/env python3
 
 import os
-# from python-dotenv import load_dotenv
+from dotenv import load_dotenv
 
 
 def main():
     # 1. Charger le fichier .env s'il existe
-    # load_dotenv()
+    load_dotenv()
     # si le fichier existe pas : pip install python-dotenv
 
     print("ORACLE STATUS: Reading the Matrix...")
 
-    # 2. Récupération des variables avec gestion d'erreurs
-    # On utilise os.getenv() pour éviter
-    # que le script crash si une variable manque
     mode = os.getenv("MATRIX_MODE", "unknown")
     db_url = os.getenv("DATABASE_URL")
     api_key = os.getenv("API_KEY")

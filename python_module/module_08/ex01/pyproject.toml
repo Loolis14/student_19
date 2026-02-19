@@ -5,7 +5,7 @@ description = "Matrix Data Loading"
 authors = ["mmeurer"]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.10"
 pandas = "^2.1.0"
 numpy = "^1.26.0"
 matplotlib = "^3.7.2"

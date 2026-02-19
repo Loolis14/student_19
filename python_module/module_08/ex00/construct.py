@@ -32,7 +32,7 @@ def venv_activated() -> None:
     site_packages = site.getsitepackages()[0]
 
     print("\nMATRIX STATUS: Welcome to the construct\n")
-    print(f"Current Python: {sys.executable}") 
+    print(f"Current Python: {sys.executable}")
     print(f"Virtual Environment: {venv_name}")
     print(f"Environment Path: {venv_root}")
     print("\nSUCCESS: You're in an isolated environment!\n"
