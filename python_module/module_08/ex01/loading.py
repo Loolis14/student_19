@@ -3,6 +3,7 @@
 """Second exercise."""
 
 import sys
+import os
 import importlib.util
 
 
@@ -24,8 +25,15 @@ def check_dependencies() -> bool:
 
     if missing:
         print("\n=== INSTALLATION INSTRUCTIONS ===")
-        print("For Pip:    pip install -r requirements.txt")
-        print("For Poetry: poetry install")
+        print("\nFirst install and activate a virtual environnement:")
+        print("python3 -m venv venv")
+        print("source venv/bin/activate")
+        print("\nThen choose the way the dependencies will be installed:")
+        print("with Pip:    pip install -r requirements.txt")
+        print("with Poetry: pip install -U pip setuptools")
+        print("             pip install poetry")
+        print("             poetry install")
+
         return False
     return True
 
@@ -36,14 +44,14 @@ def run_matrix_analysis() -> None:
     import numpy
     import matplotlib.pyplot as plt
 
+    demonstrate_management()
+
     print("\nAnalyzing Matrix data...")
-    # Simulation de données : 1000 points de "code" de la Matrix
     data = numpy.random.randn(1000).cumsum()
     df = pandas.DataFrame(data, columns=['Matrix Stream'])
 
     print(f"Processing {len(df)} data points...")
 
-    # Génération du graphique
     plt.figure(figsize=(10, 5))
     plt.plot(df, color='green')
     plt.title("Matrix Data Stream Analysis", color='green')
@@ -52,6 +60,22 @@ def run_matrix_analysis() -> None:
     print("Generating visualization...")
     print("Analysis complete!")
     print("Results saved to: matrix_analysis.png")
+
+
+def demonstrate_management():
+    print("=== Dependency Manager analyse ===\n")
+    lock_file = os.path.join(os.getcwd(), "poetry.lock")
+
+    if os.path.exists(lock_file):
+        manager = "POETRY"
+        description = ("Dependencies versions locked on a file and a "
+                       "virtual environnement automatically created.")
+    else:
+        manager = "PIP"
+        description = "Manually managed versions (Risk of dependency drift)"
+
+    print(f"Dependecy Manager detected: {manager}")
+    print(description)
 
 
 if __name__ == "__main__":

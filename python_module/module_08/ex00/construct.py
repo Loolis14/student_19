@@ -12,6 +12,7 @@ def venv_not_activated() -> None:
     print("\nMATRIX STATUS: You're still plugged in\n")
     print(f"Current Python: {sys.executable}")
     print("Virtual Environment: None detected")
+    print(f"\nPackage installation path:\n{site.getsitepackages()[0]}")
 
     print("\nWARNING: You're in the global environment!")
     print("The machines can see everything you install.\n")
