@@ -1,15 +1,29 @@
 #!/usr/bin/env python3
+"""
+• Demonstrates different configuration for development/production
+• Includes proper error handling for missing configuration
+• Shows how to keep secrets secure
 
+Output:
+Environment variable override
+$> MATRIX_MODE=production API_KEY=secret123 python3 oracle.py
+# Should use environment variables over .env file
+"""
 import os
-from dotenv import load_dotenv
+from dotenv import load_dotenv, dotenv_values
 
 
-def main():
-    # 1. Charger le fichier .env s'il existe
-    load_dotenv()
-    # si le fichier existe pas : pip install python-dotenv
-
-    print("ORACLE STATUS: Reading the Matrix...")
+def main() -> None:
+    print("\nORACLE STATUS: Reading the Matrix...\n")
+    if not load_dotenv():
+        print('missing .env file -> cp .env.example .env')
+        return
+    elif 'DATABASE' not in dotenv_values():
+        print('missing key - DATABASE')
+        return
+    elif 'API_KEY' not in dotenv_values():
+        print('missing key - API_KEY')
+        return
 
     mode = os.getenv("MATRIX_MODE", "unknown")
     db_url = os.getenv("DATABASE_URL")

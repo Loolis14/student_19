@@ -1,6 +1,6 @@
 [tool.poetry]
-name = "ex01"
-version = "0.1.0"
+name = "matrix"
+version = "1.0.0"
 description = "Matrix Data Loading"
 authors = ["mmeurer"]
 

@@ -6,12 +6,11 @@ import sys
 import importlib.util
 
 
-def check_dependencies() -> None:
+def check_dependencies() -> bool:
     """Check if the dependencies are installed."""
     packages = ["pandas", "numpy", "matplotlib", "requests"]
     missing = []
 
-    print("LOADING STATUS: Loading programs...")
     print("Checking dependencies:")
 
     for package in packages:
@@ -27,7 +26,8 @@ def check_dependencies() -> None:
         print("\n=== INSTALLATION INSTRUCTIONS ===")
         print("For Pip:    pip install -r requirements.txt")
         print("For Poetry: poetry install")
-        sys.exit(1)
+        return False
+    return True
 
 
 def run_matrix_analysis() -> None:
@@ -55,5 +55,8 @@ def run_matrix_analysis() -> None:
 
 
 if __name__ == "__main__":
-    check_dependencies()
-    run_matrix_analysis()
+    print("\nLOADING STATUS: Loading programs...\n")
+    if check_dependencies():
+        run_matrix_analysis()
+    else:
+        sys.exit(1)
