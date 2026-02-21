@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-• Demonstrates different configuration for development/production
+• Demonstrates different configuration for development : pour faire des tests
+/production : deploie l'appli et tout est suppose etre sur
 • Includes proper error handling for missing configuration
 • Shows how to keep secrets secure
 
@@ -25,7 +26,7 @@ def main() -> None:
         print('missing key - API_KEY')
         return
 
-    mode = os.getenv("MATRIX_MODE", "unknown")
+    mode = os.getenv("MATRIX_MODE", "development")
     db_url = os.getenv("DATABASE_URL")
     api_key = os.getenv("API_KEY")
     log_level = os.getenv("LOG_LEVEL", "INFO")
@@ -55,7 +56,7 @@ def main() -> None:
     gitignore_exists = os.path.exists(".gitignore")
     env_ignored = False
     if gitignore_exists:
-        with open(".gitignore", "r") as f:
+        with open(".gitignore") as f:
             if ".env" in f.read():
                 env_ignored = True
 
