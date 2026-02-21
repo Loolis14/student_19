@@ -26,4 +26,10 @@ class ArtifactCard(Card):
 
     def activate_ability(self) -> dict:
         """Return is ability is available."""
-        pass
+        ability = {}
+        for word in self.effect.split():
+            if word == 'heal':
+                ability['effect'] = 'positif'
+            elif word == 'damage':
+                ability['effect'] = 'negatif'
+        return ability

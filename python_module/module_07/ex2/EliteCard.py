@@ -68,8 +68,15 @@ class EliteCard(Card, Combatable, Magical):
 
     def get_combat_stats(self) -> dict:
         """Get the stats of the combat."""
-        pass
+        return {
+            'attacker': self.name,
+            'damage': self.attack_,
+            'combat_type': 'melee'
+        }
 
     def get_magic_stats(self) -> dict:
         """Get state of magic."""
-        pass
+        return {
+            'mana': self.mana,
+            'magic cards': self.magic
+        }

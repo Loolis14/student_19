@@ -25,4 +25,7 @@ class SpellCard(Card):
 
     def resolve_effect(self, targets: list) -> dict:
         """Resolve effect."""
-        pass
+        result = {}
+        for target in targets:
+            result[target] = self.effect_type
+        return result

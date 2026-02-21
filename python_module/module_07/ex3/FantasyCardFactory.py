@@ -55,7 +55,10 @@ class FantasyCardFactory(CardFactory):
 
     def create_themed_deck(self, size: int) -> dict:
         """Create a themed deck."""
-        pass
+        return {
+            'strategy': 'Agressive',
+            'deck size': size
+        }
 
     def get_supported_types(self) -> dict:
         """Return the types supported."""

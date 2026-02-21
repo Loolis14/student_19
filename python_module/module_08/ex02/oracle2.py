@@ -4,13 +4,7 @@ Install a virtuel environnement and execute:
 'pip install python-dotenv'
 • Demonstrates different configuration for development : pour faire des tests
 /production : deploie l'appli et tout est suppose etre sur
-• Includes proper error handling for missing configuration
 • Shows how to keep secrets secure
-
-Output:
-Environment variable override
-$> MATRIX_MODE=production API_KEY=secret123 python3 oracle.py
-# Should use environment variables over .env file
 """
 import os
 from dotenv import load_dotenv, dotenv_values
@@ -18,8 +12,7 @@ from dotenv import load_dotenv, dotenv_values
 
 def main() -> None:
     print("\nORACLE STATUS: Reading the Matrix...\n")
-    env = load_dotenv()
-    if not env:
+    if not load_dotenv():
         print(
             "Missing .env file.\n\nExample of a configuration:\n"
             "MATRIX_MODE='development' or 'production'\n"
@@ -30,36 +23,30 @@ def main() -> None:
             )
         return
 
-    elif 'DATABASE_URL' not in dotenv_values():
-        print('missing key - DATABASE')
-        return
-    elif 'API_KEY' not in dotenv_values():
-        print('missing key - API_KEY')
-        return
+    config = dotenv_values()
+    mode = os.getenv("MATRIX_MODE") or config.get("MATRIX_MODE")
+    db_url = os.getenv("DATABASE_URL") or config.get("DATABASE_URL")
+    api_key = os.getenv("API_KEY") or config.get("API_KEY")
+    log_level = os.getenv("LOG_LEVEL") or config.get("LOG_LEVEL")
+    zion_url = os.getenv("ZION_ENDPOINT") or config.get("ZION_ENDPOINT")
 
-    mode = os.getenv("MATRIX_MODE", "development")
-    db_url = os.getenv("DATABASE_URL")
-    api_key = os.getenv("API_KEY")
-    log_level = os.getenv("LOG_LEVEL", "INFO")
-    zion_url = os.getenv("ZION_ENDPOINT")
-
-    missing = [
-        var for var in ["DATABASE_URL", "API_KEY", "ZION_ENDPOINT"]
-        if not os.getenv(var)]
+    required_keys = [
+        "MATRIX_MODE",
+        "DATABASE_URL",
+        "API_KEY",
+        "LOG_LEVEL",
+        "ZION_ENDPOINT"
+    ]
+    missing = [key for key in required_keys if not config.get(key) or config.get(key).strip() == ""]
     if missing:
         print(f"WARNING: Missing configuration for: {', '.join(missing)}")
-
+    
     print("\nConfiguration loaded:")
-    print(f"Mode: {mode}")
-    """ print(
-        f"Database: "
-        f"{'Connected to local instance'
-           if 'localhost' in (db_url or '')
-           else 'Connected to remote instance'}"
-           ) """
-    print(f"API Access: {'Authenticated' if api_key else 'Missing'}")
-    print(f"Log Level: {log_level}")
-    print(f"Zion Network: {'Online' if zion_url else 'Offline'}")
+    print(f"Mode: {mode if mode else 'Missing data'}")
+    print(f"Database: {db_url if db_url else 'Missing data'}")
+    print(f"API Access: {api_key if api_key else 'Missing data'}")
+    print(f"Log Level: {log_level if log_level else 'Missing data'}")
+    print(f"Zion Network: {zion_url if zion_url else 'Missing data'}")
 
     print("\nEnvironment security check:")
 
@@ -82,3 +69,17 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+"""
+Configuration loaded:
+Mode: development
+Database: Connected to local instance
+API Access: Authenticated
+Log Level: DEBUG
+Zion Network: Online
+Environment security check:
+[OK] No hardcoded secrets detected
+[OK] .env file properly configured
+[OK] Production overrides available
+The Oracle sees all configurations.
+"""

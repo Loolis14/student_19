@@ -46,7 +46,11 @@ class TournamentCard (Card, Combatable, Rankable):
 
     def get_tournament_stats(self) -> dict:
         """Get tournament stats."""
-        pass
+        return {
+            'id': self.id,
+            'record': self.record,
+            'rating': self.rating
+        }
 
     def defend(self, incoming_damage: int) -> dict:
         """Defend vs an attack."""
