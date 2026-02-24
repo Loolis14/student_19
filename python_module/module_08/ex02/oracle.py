@@ -1,15 +1,20 @@
 #!/usr/bin/env python3
 
-"""
-Install a virtuel environnement and execute:
-'pip install python-dotenv'
-"""
+"""Third exercise."""
 
 import os
-from dotenv import load_dotenv, dotenv_values
+
+try:
+    from dotenv import load_dotenv, dotenv_values
+except ImportError:
+    print("Error: The 'python-dotenv' module is not installed.")
+    print("Please install a virtuel environnement and then run")
+    print("'pip install python-dotenv'")
+    exit(1)
 
 
 def main() -> None:
+    """Test notions on subject."""
     print("\nORACLE STATUS: Reading the Matrix...")
     if not load_dotenv():
         print(

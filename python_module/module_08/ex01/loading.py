@@ -62,8 +62,9 @@ def run_matrix_analysis() -> None:
     print("Results saved to: matrix_analysis.png")
 
 
-def demonstrate_management():
-    print("=== Dependency Manager analyse ===\n")
+def demonstrate_management() -> None:
+    """Demonstrate management."""
+    print("\n=== Dependency Manager analyse ===\n")
     lock_file = os.path.join(os.getcwd(), "poetry.lock")
 
     if os.path.exists(lock_file):

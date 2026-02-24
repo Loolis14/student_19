@@ -38,7 +38,7 @@ def venv_activated() -> None:
     print(f"Environment Path: {venv_root}")
     print("\nSUCCESS: You're in an isolated environment!\n"
           "Safe to install packages without affecting the global system.\n")
-    print(f"Package installation path:\n {site_packages}")
+    print(f"Package installation path:\n{site_packages}")
 
 
 def is_venv() -> bool:
