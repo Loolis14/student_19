@@ -5,8 +5,13 @@ Install a virtuel environnement and execute:
 'pip install pydantic'
 """
 
+try:
+    from pydantic import BaseModel, Field, model_validator, ValidationError
+except ImportError:
+    print("Pydantic module not installed.\nRun:")
+    print("pip install pydantic")
+    exit(1)
 from enum import Enum
-from pydantic import BaseModel, Field, model_validator, ValidationError
 from datetime import datetime, timezone
 from typing_extensions import Self
 
@@ -77,7 +82,7 @@ class SpaceMission(BaseModel):
         return self
 
 
-def main():
+def main() -> None:
     try:
         mission1 = SpaceMission(mission_id="M2024_MARS",
                                 mission_name="Mars Colony Establishment",

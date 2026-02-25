@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 """
-Install a virtuel environnement and execute:
+Install a virtuel environnement and run:
 'pip install pydantic'
 """
 
-from pydantic import BaseModel, Field
+try:
+    from pydantic import BaseModel, Field
+except ImportError:
+    print("Pydantic module not installed.\nRun:")
+    print("pip install pydantic")
+    exit(1)
 from datetime import datetime, timezone
 from typing import Optional
 
