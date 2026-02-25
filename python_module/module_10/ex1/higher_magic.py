@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
 
+from typing import Any
+
 
 def spell_combiner(spell1: callable, spell2: callable) -> callable:
-    def combined(*args, **kwargs):
+    def combined(*args: Any, **kwargs: Any) -> tuple:
         return (spell1(*args, **kwargs), spell2(*args, **kwargs))
     return combined
 
 
 def power_amplifier(base_spell: callable, multiplier: int) -> callable:
-    def multiply(x: int):
+    def multiply(x: int) -> int:
         return (base_spell(x) * multiplier)
     return multiply
 
 
 def conditional_caster(condition: callable, spell: callable) -> callable:
-    def returning_condition(mana: int, spells: str):
+    def returning_condition(mana: int, spells: str) -> str:
         if condition(mana):
             return spell(spells)
         return 'Spell fizzled'
@@ -22,7 +24,7 @@ def conditional_caster(condition: callable, spell: callable) -> callable:
 
 
 def spell_sequence(spells: list[callable]) -> callable:
-    def result_spell(*args, **kwargs):
+    def result_spell(*args: Any, **kwargs: Any) -> list:
         return [spell(*args, **kwargs) for spell in spells]
     return result_spell
 

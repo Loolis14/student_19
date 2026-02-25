@@ -4,7 +4,7 @@
 def mage_counter() -> callable:
     i = 0
 
-    def count_time():
+    def count_time() -> int:
         nonlocal i
         i += 1
         return i
@@ -15,7 +15,7 @@ def mage_counter() -> callable:
 def spell_accumulator(initial_power: int) -> callable:
     i = initial_power
 
-    def count_power():
+    def count_power() -> int:
         nonlocal i
         i += initial_power
         return i
@@ -24,7 +24,7 @@ def spell_accumulator(initial_power: int) -> callable:
 
 
 def enchantment_factory(enchantment_type: str) -> callable:
-    def create_enchant(item: str):
+    def create_enchant(item: str) -> str:
         return f'{enchantment_type} {item}'
     return create_enchant
 
@@ -32,10 +32,10 @@ def enchantment_factory(enchantment_type: str) -> callable:
 def memory_vault() -> dict[str, callable]:
     storage = {}
 
-    def store(key, value):
+    def store(key: str, value: str) -> None:
         storage[key] = value
 
-    def recall(key):
+    def recall(key: str) -> None:
         return storage.get(key, 'Memory not found')
 
     return {

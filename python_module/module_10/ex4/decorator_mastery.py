@@ -2,11 +2,12 @@
 
 import functools
 import time
+from typing import Any
 
 
 def spell_timer(func: callable) -> callable:
     @functools.wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
         print(f"Casting {func.__name__}...")
         start_time = time.time()
         result = func(*args, **kwargs)
@@ -20,7 +21,7 @@ def spell_timer(func: callable) -> callable:
 def power_validator(min_power: int) -> callable:
     def decorator(func: callable) -> callable:
         @functools.wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             power = args[-1]
             if power >= min_power:
                 return func(*args, **kwargs)
@@ -32,7 +33,7 @@ def power_validator(min_power: int) -> callable:
 def retry_spell(max_attempts: int) -> callable:
     def decorator(func: callable) -> callable:
         @functools.wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             attempt = 1
             while attempt <= max_attempts:
                 try:
@@ -69,7 +70,7 @@ def test() -> None:
     print("\nTesting spell timer...")
 
     @spell_timer
-    def fireball():
+    def fireball() -> str:
         return "Result: Fireball cast!"
     print(fireball())
 
@@ -78,11 +79,18 @@ def test() -> None:
     imardin = MageGuild()
     mage_names = ['Morgan', 'Ember', 'Ash', 'Luna', 'Rowan']
     invalid_names = ['Jo', 'A', 'Alex123', 'Test@Name', 'Shrek!']
+    acc = 0
     for name in mage_names:
-        print(imardin.validate_mage_name(name))
+        if not imardin.validate_mage_name(name):
+            acc += 1
+    print(f'{"True" if acc == 0 else "False"}')
+    acc = 0
     for name in invalid_names:
-        print(imardin.validate_mage_name(name))
+        if imardin.validate_mage_name(name):
+            acc += 1
+    print(f'{"False" if acc == 0 else "True"}')
 
+    print("\nTesting cast spell...")
     test_powers = [28, 5, 16, 8]
     spell_names = ['meteor', 'darkness', 'earthquake', 'tornado']
     for i in range(4):

@@ -26,7 +26,7 @@ def mage_stats(mages: list[dict]) -> dict:
 
 
 def test() -> None:
-    print("Testing artifact sorter...")
+    print("\nTesting artifact sorter...")
     artifacts = [{'name': 'Earth Shield', 'power': 119, 'type': 'armor'},
                  {'name': 'Earth Shield', 'power': 119, 'type': 'accessory'},
                  {'name': 'Water Chalice', 'power': 98, 'type': 'focus'},
@@ -37,7 +37,7 @@ def test() -> None:
                               f'({s["power"]} power)' for s in sort)
         )
 
-    print("Testing power filter...")
+    print("\nTesting power filter...")
     mages = [{'name': 'Kai', 'power': 97, 'element': 'shadow'},
              {'name': 'Luna', 'power': 95, 'element': 'fire'},
              {'name': 'Phoenix', 'power': 79, 'element': 'wind'},
@@ -46,11 +46,11 @@ def test() -> None:
     filter = power_filter(mages, 80)
     print(", ".join(f'{f["name"]} ({f["power"]} power)' for f in filter))
 
-    print("Testing spell transformer...")
+    print("\nTesting spell transformer...")
     spells = ['lightning', 'earthquake', 'freeze', 'flash']
     print(" ".join(spell_transformer(spells)))
 
-    print("Testing mage stats...")
+    print("\nTesting mage stats...")
     stats = mage_stats(mages)
     print(", ".join(f'{key}: {value}' for key, value in stats.items()))
 

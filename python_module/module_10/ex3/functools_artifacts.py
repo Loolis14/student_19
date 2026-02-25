@@ -4,10 +4,11 @@
 
 from functools import reduce, partial, lru_cache, singledispatch
 import operator
+from typing import Any
 
 
 def spell_reducer(spells: list[int], operation: str) -> int:
-    """Use of reduce."""
+    """Use of reduce feature."""
     match operation:
         case "add":
             return reduce(operator.add, spells)
@@ -20,7 +21,7 @@ def spell_reducer(spells: list[int], operation: str) -> int:
 
 
 def partial_enchanter(base_enchantment: callable) -> dict[str, callable]:
-    """Use of partial module."""
+    """Use of partial feature."""
     fire_enchant = partial(base_enchantment, power=50, element='fire')
     ice_enchant = partial(base_enchantment, power=50, element='ice')
     lightning_enchant = partial(base_enchantment, power=50, element='light')
@@ -43,7 +44,7 @@ def memoized_fibonacci(n: int) -> int:
 def spell_dispatcher() -> callable:
     """Use of dispatch with the first argument given."""
     @singledispatch
-    def display(value) -> str:
+    def display(value: Any) -> str:
         """Take a type unsported."""
         return "Type not supported"
 
@@ -78,7 +79,7 @@ def test() -> None:
 
     def base_enchantment(power: int, element: str, target: str) -> str:
         return f'{target} hits with {power} {element} damage!'
-    
+
     base = partial_enchanter(base_enchantment)
     print(base['fire_enchant'](target='Dragon'))
     print(base['ice_enchant'](target='Goblin'))
