@@ -1,0 +1,12 @@
+# Python bytecode
+**/__pycache__/
+
+# Type checking cache
+**/.mypy_cache/
+
+# Virtual environment
+**/venv/
+
+# macOS / Windows metadata
+.DS_Store
+*Zone.Identifier
