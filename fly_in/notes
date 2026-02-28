@@ -1,2 +1,7 @@
 input: grap + contraints
 to do : efficient routes to a target location
+
+pour le moment les metadata sont definis en valeur par defaut si c'est mal orthographie
+-> Parse metadata zone !
+
+si situation impossible ?
