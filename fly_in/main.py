@@ -3,7 +3,7 @@ main program.
 """
 
 import sys
-from parser import Parser
+from my_parser import Parser, ConfigError
 
 
 if __name__ == "__main__":
@@ -12,7 +12,11 @@ if __name__ == "__main__":
         sys.exit(1)
 
     file_parser = Parser()
-    file_parser.main_parsing(sys.argv[1])
+    try:
+        file_parser.main_parsing(sys.argv[1])
+    except ConfigError as e:
+        print(e)
+        sys.exit(1)
     print('drones', file_parser.map_data['nb_drones'])
     print('hub', file_parser.map_data['hub'])
     print('start', file_parser.map_data['start_hub'])

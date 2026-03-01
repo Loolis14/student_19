@@ -6,4 +6,6 @@ pour le moment les metadata sont definis en valeur par defaut si c'est mal ortho
 
 si situation impossible ?
 
-A faire demain : parser les hub avec la regex. les hub normaux et les start/end
+A verifier : connection juste 2 zone par ligne !
+_parse_metadata_hub a reecrire pour voir les vraies erreurs.
+creer une class ligne pour stocker le contenu et la ligne.
