@@ -1,5 +1,6 @@
 import sys
 import re
+from typing import Optional
 
 
 class ConfigError(Exception):
@@ -27,8 +28,7 @@ class Parser:
                 config_load.append(line.split("#")[0])
         return config_load
 
-    @staticmethod
-    def _create_dictionnary(config: list[str]) -> dict[str, str]:
+    def _create_dictionnary(self, config: list[str]) -> None:
         """
         Create a dictionnary
         Check if the first line is 'nb_drones'
@@ -45,7 +45,7 @@ class Parser:
         if sum(1 for end in config if "end_hub" in end) > 1:
             raise ConfigError("There must be exactly one end_hub")
 
-        config_mission = {}
+        config_mission = {"hub": [], "connection": []}
         for line in config:
             try:
                 variable, content = line.split(":")
@@ -54,38 +54,16 @@ class Parser:
                         "Format accepted:\n"
                         "<variable>: <content>")
             else:
-                config_mission[variable] = content
-        return config_mission
+                if variable == "hub" or variable == "connection":
+                    config_mission[variable].append(content.strip())
+                else:
+                    config_mission[variable] = content.strip()
+        self.map_data = config_mission
 
-    def parsing_in_map(self, file):
-        config: dict[str, str] = self._file_parser(file)
-
-        end_hub = config.get("end_hub", "").split()
-        if not end_hub:
-            raise ConfigError("An end_hub must be configured.")
-        if len(end_hub) < 3 or len(end_hub) > 4:
-            raise ConfigError("Ending zone should be defined: "
-                              "<name> <x> <y> [metadata]")
-        self.start_name = end_hub[0]
-        if end_hub[1].isdigit():
-            self.start_x = end_hub[1]
-        else:
-            raise ConfigError("Ending coordinate 'x' "
-                              "should be an positive integer.")
-        if end_hub[2].isdigit():
-            self.start_y = end_hub[2]
-        else:
-            raise ConfigError("Ending coordinate 'x' "
-                              "should be an postive integer.")
-        if len(end_hub) == 4:
-            if end_hub[3][0] == '[' and end_hub[3][-1] == ']':
-                self.start_metadata = end_hub[3]
-            else:
-                raise ConfigError("Metadatas should be enclosed in brackets.")
-        # connection = config.get("connection")
-        # hub = config.get("hub")
-
-    def missing_config(self) -> None:
+    def _missing_config(self) -> None:
+        """
+        Check if all mandatory keys are present.
+        """
         config_key = set(self.map_data.keys())
         config_need = {"nb_drones", "start_hub",
                        "end_hub", "hub", "connection"}
@@ -94,7 +72,8 @@ class Parser:
             raise ConfigError('Missing configuration: '
                               f'{", ".join(config_missing)}')
 
-    def parse_drones(self) -> None:
+    def _parse_drones(self) -> None:
+        """Create an int which represente the number of drones."""
         nb_drones = self.map_data.get("nb_drones", "").strip()
         if nb_drones.isdigit():
             self.nb_drones = int(nb_drones)
@@ -102,10 +81,17 @@ class Parser:
             raise ConfigError("nb_drones should be a positive integer.")
 
     @staticmethod
-    def parse_metadata_zone(metadata: str) -> tuple[str]:
+    def _parse_metadata_hub(metadata: Optional[str]) -> tuple[str]:
+        """
+        Create a tuple with the metadata, if nothing is given,
+        default values are given.
+        """
         data = {'zone': 'normal',
                 'color': None,
                 'max_drones': 1}
+
+        if not metadata:
+            return tuple(data.values())
 
         pattern = re.compile(r"(zone|color|max_drones)=([^ ]+)")
         for match in metadata.split():
@@ -127,46 +113,94 @@ class Parser:
             data[key] = value
         return tuple(data.values())
 
-    def parse_start(self, position: str) -> None:
-        _hub = self.map_data.get(f"{position}_hub", "").split()
-        if not _hub:
-            raise ConfigError(f"A {position}_hub must be configured.")
-        if len(_hub) < 3 or len(_hub) > 4:
-            raise ConfigError(f"{position}ing zone should be defined: "
-                              "<name> <x> <y> [metadata]")
-
-        if _hub[1].isdigit():
-            start_x = int(_hub[1])
-        else:
-            raise ConfigError(f"{position}ing coordinate 'x' "
-                              "should be a positive integer.")
-        if _hub[2].isdigit():
-            start_y = int(_hub[2])
-        else:
-            raise ConfigError(f"{position}ing coordinate 'y' "
-                              "should be a postive integer.")
-        if len(_hub) == 4:
-            if _hub[3][0] == '[' and _hub[3][-1] == ']':
-                start_metadata = Parser.parse_metadata_zone(_hub[3][1:-1])
-            else:
-                raise ConfigError("Metadatas should be enclosed in brackets.")
-
-        self.map_data[f'{position}_hub'] = {
-            f'{position}_name': _hub[0],
-            f'{position}_x': start_x,
-            f'{position}_y': start_y,
-            f'{position}_metadata': start_metadata
+    @staticmethod
+    def _parse_hub(value: str, position: str) -> dict:
+        """Parse hub in a dictionnary."""
+        pattern = re.compile(r"^([^- ]+) (\d+) (\d+)(?: \[([^\]]+)\])?$")
+        match = pattern.match(value)
+        if not match:
+            raise ConfigError(f"Hub config: '{position}: "
+                              "<name> <x> <y> [metadata]'\n"
+                              "Zone names can use any valid characters "
+                              "but dashes and spaces.\nx et y should "
+                              "be positive integers.\nAll metadata is "
+                              "optional and enclosed in brackets.")
+        name, x, y, metadata = match.groups()
+        tuple_metadata = Parser._parse_metadata_hub(metadata)
+        return {
+            'name': name,
+            'x': int(x),
+            'y': int(y),
+            'metadata': tuple_metadata
             }
+
+    def _parse_metadata_connection(metadata: Optional[str]) -> int:
+        if not metadata:
+            return 1
+
+        pattern = re.compile(r"^(max_link_capacity)=(\d+)$")
+        match = pattern.match(metadata)
+        if not match:
+            raise ConfigError(f"Metadatablock {metadata} is not valid."
+                              "Usage: [max_link_capacity=<x>]")
+        max_, value = match
+        if not value.isdigit():
+            raise ConfigError(f"{value}.\nCapacity values "
+                              "max_link_capacity must be positive integers.")
+        return value
+
+    def _parse_connections(self) -> list[set, Optional[tuple]]:
+        """The same connection must not appear more than once"""
+        connections = []
+        hub_names = [hub.get('name') for hub in self.map_data['hub']]
+        hub_names.append(self.map_data['start_hub']['name'])
+        hub_names.append(self.map_data['end_hub']['name'])
+
+        pattern = re.compile(r"^([^ -]+)-([^ -]+)(?: \[([^\]]+)\])?$")
+        temp_co = []
+        for connection in self.map_data['connection']:
+            match = pattern.match(connection.strip())
+            if not match:
+                raise ConfigError(f"{connection}\n"
+                                  "Usage: <zone1>-<zone2> [metadata]")
+            connection_b, connection_a, metadata = match.groups()
+            if connection_a not in hub_names:
+                raise ConfigError(f"{connection_a} not a valid hub.")
+            if connection_b not in hub_names:
+                raise ConfigError(f"{connection_b} not a valid hub.")
+            for set_ in temp_co:
+                if not (set_ - {connection_a, connection_b}):
+                    raise ConfigError(f"{set_}\nThe same connection "
+                                      "must not appear more than once")
+            temp_co.append({connection_a, connection_b})
+            max_capacity = Parser._parse_metadata_connection(metadata)
+            connections.append(({connection_a, connection_b}, max_capacity))
+
+            self.map_data['connection'] = connections
 
     def main_parsing(self, file: str) -> None:
         file_read = Parser._file_reader(file)
         try:
-            self.map_data = Parser._create_dictionnary(file_read)
-            self.missing_config()
-            self.parse_drones()
-            self.parse_start('start')
-            self.parse_start('end')
-            self.parse_hub()
+            self._create_dictionnary(file_read)
+            self._missing_config()
+
+            # parsing of the different config keys
+            self._parse_drones()
+
+            dict_start = Parser._parse_hub(self.map_data['start_hub'],
+                                           'start_hub')
+            self.map_data['start_hub'] = dict_start
+
+            dict_end = Parser._parse_hub(self.map_data['end_hub'],
+                                         'end_hub')
+            self.map_data['end_hub'] = dict_end
+
+            for i, hub in enumerate(self.map_data['hub']):
+                dict_hub = Parser._parse_hub(hub, 'hub')
+                self.map_data['hub'][i] = dict_hub
+
+            self._parse_connections()
+
         except ConfigError as e:
             print(f"Configuration error: {e}")
             sys.exit()
