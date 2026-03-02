@@ -1,11 +1,6 @@
 input: grap + contraints
 to do : efficient routes to a target location
 
-pour le moment les metadata sont definis en valeur par defaut si c'est mal orthographie
--> Parse metadata zone !
-
 si situation impossible ?
 
 A verifier : connection juste 2 zone par ligne !
-_parse_metadata_hub a reecrire pour voir les vraies erreurs.
-creer une class ligne pour stocker le contenu et la ligne.
