@@ -4,3 +4,13 @@ to do : efficient routes to a target location
 si situation impossible ?
 
 A verifier : connection juste 2 zone par ligne !
+
+
+Objective:
+move all drones in the fewest possible simulation turns
+
+Drone bouge ensemble
+
+differentes stratégie a implementer
+
+Visual representation

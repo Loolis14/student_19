@@ -101,8 +101,7 @@ class Parser:
                               "not a positive integer.")
 
     @staticmethod
-    def _parse_hub_metadata(metadata: Optional[str],
-                            line: Optional[int]) -> tuple[str]:
+    def _parse_hub_metadata(metadata: Optional[str], line: Optional[int]) -> dict:
         """
         Create a tuple with the metadata, if nothing is given,
         default values are given.
@@ -112,7 +111,7 @@ class Parser:
                 'max_drones': 1}
 
         if not metadata:
-            return tuple(data.values())
+            return data
 
         pattern = re.compile(r"(zone|color|max_drones)=([^ ]+)")
         for match in metadata.split():
@@ -136,7 +135,7 @@ class Parser:
                                       "color.\nValues for color are any valid "
                                       "single-word strings.")
             data[key] = value
-        return tuple(data.values())
+        return data
 
     def _parse_hub(self, hub_config: Line) -> None:
         """Parse the configuration on hub line."""
@@ -150,15 +149,14 @@ class Parser:
                               "dashes and spaces.\nx et y should be positive "
                               "integers.\nAll metadata is optional and "
                               "enclosed in brackets.")
-
         name, x, y, metadata = match.groups()
-        tuple_metadata = Parser._parse_hub_metadata(metadata, hub_config.nb)
         dict_config = {
             'name': name,
             'x': int(x),
-            'y': int(y),
-            'metadata': tuple_metadata
+            'y': int(y)
             }
+        dict_metadata = Parser._parse_hub_metadata(metadata, hub_config.nb)
+        dict_config.update(dict_metadata)
         attr_name = hub_config.key
         if attr_name == 'hub':
             self.hub.append(dict_config)
@@ -210,7 +208,7 @@ class Parser:
         capacity = Parser._parse_metadata_connection(metadata, co_line.nb)
         self.connection.append((hub_a, hub_b, capacity))
 
-    def main_parsing(self, file: str) -> None:
+    def main_parsing(self, file: str) -> dict:
         self._file_reader(file)
         if not self.lines:
             raise ConfigError("Empty configuration file.")
@@ -227,8 +225,10 @@ class Parser:
             if config_line.key == 'connection':
                 self._parse_connection(config_line)
 
-        print(self.nb_drones)
-        print(self.start_hub)
-        print(self.end_hub)
-        print(self.hub)
-        print(self.connection)
+        return {
+            'nb_drones': self.nb_drones,
+            'start_hub': self.start_hub,
+            'end_hub': self.end_hub,
+            'hub': self.hub,
+            'connection': self.connection,
+        }

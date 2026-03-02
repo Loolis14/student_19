@@ -4,7 +4,7 @@ main program.
 
 import sys
 from my_parser import Parser, ConfigError
-# from map import Map
+from graph import Graph
 
 
 if __name__ == "__main__":
@@ -14,16 +14,9 @@ if __name__ == "__main__":
 
     file_parser = Parser()
     try:
-        file_parser.main_parsing(sys.argv[1])
+        config = file_parser.main_parsing(sys.argv[1])
     except ConfigError as e:
         print(f"Configuration error: {e}")
         sys.exit(1)
-    # map = Map(file_parser)
-    print()
-    for line in file_parser.lines:
-        print(line.content)
-    """ print('drones', file_parser.map_data['nb_drones'])
-    print('hub', file_parser.map_data['hub'])
-    print('start', file_parser.map_data['start_hub'])
-    print('end', file_parser.map_data['end_hub'])
-    print('connection', file_parser.map_data['connection']) """
+    graph = Graph()
+    graph.main(config)
