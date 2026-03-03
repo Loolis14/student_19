@@ -14,8 +14,8 @@ class Hub:
         self.coord: tuple[int] = (dict['x'], dict['y'])
         self.zone_type: str = dict['zone']
         self.color: str = dict['color']
-        self.max_drones: int = dict['max_drones']
-        self.current_drones: list[Drone] = []
+        self.max_capacity: int = dict['max_drones']
+        self.current_drones: dict[str, Drone] = {}
 
     def get_neighbors(self, connections: list[Connection]) -> list[Hub]:
         neighbors: list[Hub] = []
