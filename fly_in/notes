@@ -14,3 +14,6 @@ Drone bouge ensemble
 differentes stratégie a implementer
 
 Visual representation
+
+Parsing : Vérifier que drones > 0
+et que le start et l'exit sont bien deux sorties différentes.

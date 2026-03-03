@@ -101,7 +101,8 @@ class Parser:
                               "not a positive integer.")
 
     @staticmethod
-    def _parse_hub_metadata(metadata: Optional[str], line: Optional[int]) -> dict:
+    def _parse_hub_metadata(metadata: Optional[str],
+                            line: Optional[int]) -> dict:
         """
         Create a tuple with the metadata, if nothing is given,
         default values are given.
@@ -195,10 +196,10 @@ class Parser:
         hub_b, hub_a, metadata = match.groups()
         if hub_a not in hub_names:
             raise ConfigError(f"line {co_line.nb} '{hub_a}' "
-                              "not a valid hub name.")
+                              "not a registered hub name.")
         if hub_b not in hub_names:
             raise ConfigError(f"line {co_line.nb} '{hub_b}' "
-                              "not a valid hub name.")
+                              "not a registered hub name.")
 
         for tuple in self.connection:
             hub1, hub2, data = tuple

@@ -9,3 +9,6 @@ class Connection:
         self.hub_b: 'Hub' = hub_b
         self.max_link_capacity: int = max_link
         self.drones_in_transit: dict = {}
+
+    def get_neighbors(self):
+        pass

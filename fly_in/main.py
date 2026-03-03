@@ -4,7 +4,7 @@ main program.
 
 import sys
 from my_parser import Parser, ConfigError
-from graph import Graph
+from engine import Engine, PathError
 
 
 if __name__ == "__main__":
@@ -18,5 +18,10 @@ if __name__ == "__main__":
     except ConfigError as e:
         print(f"Configuration error: {e}")
         sys.exit(1)
-    graph = Graph()
-    graph.main(config)
+
+    my_engine = Engine()
+    try:
+        my_engine.main(config)
+    except PathError as e:
+        print(e)
+        sys.exit(1)
