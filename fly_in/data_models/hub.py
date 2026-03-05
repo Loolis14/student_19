@@ -20,12 +20,10 @@ class Hub:
     def get_neighbors(self, connections: list[Connection]) -> list[Hub]:
         neighbors: list[Hub] = []
         for connection in connections:
-            if self.name == connection.hub_a.name:
-                if connection.hub_b.zone_type == 'blocked':
+            if self in connection.hubs:
+                neighbor_set = connection.hubs - {self}
+                neighbor: Hub = next(iter(neighbor_set))
+                if neighbor.zone_type == 'blocked':
                     continue
-                neighbors.append(connection.hub_b)
-            elif self.name == connection.hub_b.name:
-                if connection.hub_a.zone_type == 'blocked':
-                    continue
-                neighbors.append(connection.hub_a)
+                neighbors.append(neighbor)
         return neighbors

@@ -1,0 +1,48 @@
+Resources:
+pour créer et manipuler les regex: https://regex101.com/
+Dijkstra algo: https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
+https://www.w3schools.com/dsa/dsa_algo_graphs_dijkstra.php
+Dijkstra animation: https://upload.wikimedia.org/wikipedia/commons/2/23/Dijkstras_progress_animation.gif
+heapq: https://docs.python.org/3/library/heapq.html
+Edmonds-Karps explanation and use: https://medium.com/@jamierobertdawson/lem-in-finding-all-the-paths-and-deciding-which-are-worth-it-2503dffb893
+Edmonds-Karps algo: https://www.w3schools.com/dsa/dsa_algo_graphs_edmondskarp.php
+
+Edmonds-Karp ne se contente pas de trouver des chemins, il optimise le débit total du graphe.
+1. Le concept : "Pousser" et "Annuler"
+
+Edmonds-Karp est une implémentation concrète de la méthode de Ford-Fulkerson. L'idée est simple : on cherche un chemin du départ à l'arrivée, on y fait passer autant de drones que possible, puis on cherche un autre chemin.
+
+La magie d'Edmonds-Karp réside dans le Graphe Résiduel et les Arêtes de Retour (back-edges).
+2. Comment ça marche ?
+
+Imaginons que chaque connexion a une capacité (nombre de drones max par tour).
+
+    Trouver un chemin : On utilise un BFS pour trouver le chemin le plus court (en nombre de bonds) entre start et end.
+
+    Calculer le goulot d'étranglement : On regarde la capacité la plus faible sur ce chemin. C'est le flux maximum qu'on peut envoyer d'un coup.
+
+    Mettre à jour le graphe :
+
+        On soustrait ce flux des capacités sur le chemin (on "consomme" la place).
+
+        L'astuce : On crée ou on ajoute ce flux sur une "arête inverse" qui va de l'arrivée vers le départ. Cela permet à l'algorithme de "revenir en arrière" si un futur chemin a besoin de passer par là.
+
+    Recommencer : On répète l'opération jusqu'à ce qu'il n'y ait plus aucun chemin possible dans le graphe résiduel.
+
+	Edmonds-Karp travaille normalement sur les capacités des arêtes (connexions). Pour gérer la capacité des hubs, on utilise une astuce de "Split" : on transforme chaque Hub en deux hubs reliés par une arête dont la capacité est le max_drones du hub.
+
+	
+Il donne :
+
+✔️ un ensemble de chemins augmentants
+✔️ avec un débit (flow) associé
+✔️ qui maximise le flux total
+
+Le back-edge (ou arête de retour), c'est littéralement le bouton "Annuler" de ton algorithme. C'est ce qui transforme un simple chercheur de chemin en un véritable optimiseur de flux.
+
+Sans le back-edge, ton algorithme est "têtu" : une fois qu'il a pris une décision, il ne revient jamais dessus. Avec le back-edge, il devient capable de se dire : "Tiens, si je n'étais pas passé par là tout à l'heure, je pourrais faire passer deux drones de plus maintenant."
+
+
+Min-Cost Max-Flow est exactement l’algorithme qu’il te faut.
+
+A star: https://rosettacode.org/wiki/A*_search_algorithm

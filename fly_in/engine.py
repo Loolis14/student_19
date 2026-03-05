@@ -60,8 +60,11 @@ class Engine:
 
     def main(self, config: dict) -> None:
         self.create_graph(config)
-        path: deque = self.graph.find_first_path()
-        if not path:
-            raise PathError(f"No connection between '{self.graph.start_name}' "
-                            f"hub and '{self.graph.end_name}' hub.")
-        self.run_simulation(path)
+        # path: deque = self.graph.bfs_shortest_path()
+        print(self.graph.edmonds_karp())
+        # print(self.graph.edmonds_karp())
+        # path = self.graph.find_path_dijkstra()
+        # if not path:
+        #     raise PathError(f"No connection between '{self.graph.start_name}' "
+        #                     f"hub and '{self.graph.end_name}' hub.")
+        # self.run_simulation(path)

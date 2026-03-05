@@ -10,7 +10,7 @@ from engine import Engine, PathError
 if __name__ == "__main__":
     if len(sys.argv) == 1:
         print("No network of drones given.")
-        sys.exit(1)
+        sys.exit(0)
 
     file_parser = Parser()
     try:

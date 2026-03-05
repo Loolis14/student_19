@@ -11,10 +11,9 @@ if TYPE_CHECKING:
 class Connection:
     def __init__(self, id: str, hub_a: Hub, hub_b: Hub, max_link: int):
         self.id: str = id
-        self.hub_a: Hub = hub_a
-        self.hub_b: Hub = hub_b
+        self.hubs: set = {hub_a, hub_b}
         self.max_capacity: int = max_link
         self.current_drones: dict[str, Drone] = {}
 
-    def get_neighbors(self):
+    def get_neighbors(self):  # peut être avoir le hub où il doit aller ?
         pass

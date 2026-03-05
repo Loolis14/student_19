@@ -3,8 +3,6 @@ to do : efficient routes to a target location
 
 si situation impossible ?
 
-A verifier : connection juste 2 zone par ligne !
-
 
 Objective:
 move all drones in the fewest possible simulation turns
@@ -15,8 +13,20 @@ differentes stratégie a implementer
 
 Visual representation
 
-Parsing : Vérifier que drones > 0
-et que le start et l'exit sont bien deux sorties différentes.
 
 
-Dans drone : progression inutile pour le moment
+! A FAIRE !
+
+Parsing : 
+- Vérifier que drones > 0
+- que le start et l'exit sont bien deux sorties différentes.
+
+
+Dans drone : progression inutile pour le moment ? 
+
+
+- Edmons fonctionne pour le moment, mais ne prend pas en compte les connections. A voir pour les ajouter.
+
+- remplacer tous les copy par des list en compréhension ?
+
+- écrire Edmons-Karp en plus de petites fonctions

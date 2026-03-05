@@ -130,6 +130,7 @@ class Parser:
                     raise ConfigError(f"line {line} '{value}' not valid.\n"
                                       "Max drones data should be "
                                       "a positive integer.")
+                value = int(value)
             if key == 'color':
                 if not value.isalpha():
                     raise ConfigError(f"line {line} '{value}' not a valid "
@@ -140,15 +141,15 @@ class Parser:
 
     def _parse_hub(self, hub_config: Line) -> None:
         """Parse the configuration on hub line."""
-        pattern = re.compile(r"^([^- ]+) (\d+) (\d+)(?: \[([^\]]+)\])?$")
+        pattern = re.compile(r"^([^- ]+) (-?\d+) (-?\d+)(?: \[([^\]]+)\])?$")
         match = pattern.match(hub_config.value)
         if not match:
             raise ConfigError(f"line {hub_config.nb} '{hub_config.value}' not "
                               "a valid syntax\n\n"
                               "Usage: <name> <x> <y> [metadata]\n"
                               "Zone names can use any valid characters but "
-                              "dashes and spaces.\nx et y should be positive "
-                              "integers.\nAll metadata is optional and "
+                              "dashes and spaces.\nx and y should be integers."
+                              "\nAll metadata is optional and "
                               "enclosed in brackets.")
         name, x, y, metadata = match.groups()
         dict_config = {
@@ -176,10 +177,10 @@ class Parser:
                               "block not valid\n\n"
                               "Usage: max_link_capacity=<x>\nx should be"
                               " a positive integer.")
-        value = match.groups()
+        value = match.group(1)
         if not value.isdigit():
             raise ConfigError(f"line {line} '{value}' not a positive integers")
-        return value
+        return int(value)
 
     def _parse_connection(self, co_line: Line) -> None:
         """Parse connection line."""
@@ -190,7 +191,8 @@ class Parser:
         match = pattern.match(co_line.value)
         if not match:
             raise ConfigError(f"line {co_line.nb} '{co_line.value}' invalid "
-                              "syntax\n\nUsage: <zone1>-<zone2> [metadata]"
+                              "syntax\n\nUsage: <zone1>-<zone2> "
+                              "[max_link_capacity=<x>]"
                               "\nZone names can use any valid characters but"
                               " dashes and spaces.")
         hub_b, hub_a, metadata = match.groups()
