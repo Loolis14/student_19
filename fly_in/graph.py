@@ -53,43 +53,6 @@ class Graph:
         self.hubs[self.start_name].max_capacity = config['nb_drones']
         self.hubs[self.end_name].max_capacity = config['nb_drones']
 
-    def bfs_shortest_path(self) -> Optional[deque[Hub]]:
-        start_hub = self.hubs[self.start_name]
-        queu: deque[tuple[Hub, list[Hub]]] = deque([(start_hub, [start_hub])])
-        visited: set[str] = {self.start_name}
-        new_path = []
-
-        while queu:
-            current_hub, path = queu.popleft()
-            if current_hub.name == self.end_name:
-                return deque(path)
-            for neighbor in current_hub.get_neighbors(self.connections):
-                if neighbor.name not in visited:
-                    visited.add(neighbor.name)
-                    new_path.append(neighbor)
-                    queu.append((neighbor, new_path))
-        return None
-
-    def find_path_dijkstra(self) -> Optional[list]:
-        start_hub = self.hubs[self.start_name]
-        queue = [(0, id(start_hub), start_hub, [start_hub])]
-        min_costs: dict = {self.start_name: 0}
-        while queue:
-            current_cost, _, current_hub, path = heapq.heappop(queue)
-            if current_hub.name == self.end_name:
-                return path
-            if current_cost > min_costs.get(current_hub.name, float('inf')):
-                continue
-            for neighbor in current_hub.get_neighbors(self.connections):
-                weight = 2 if neighbor.zone_type == 'restricted' else 1
-                new_cost = current_cost + weight
-                if new_cost < min_costs.get(neighbor.name, float('inf')):
-                    min_costs[neighbor.name] = new_cost
-                    new_path = path + [neighbor]
-                    heapq.heappush(queue, (new_cost, id(neighbor),
-                                           neighbor, new_path))
-        return None
-
     def build_residual_graph(self) -> dict[str, dict[str, int]]:
         res_cap = {}
         for hub_name, hub in self.hubs.items():
@@ -100,7 +63,7 @@ class Graph:
             res_cap.setdefault(name_in, {})[name_out] = hub.max_capacity
             res_cap.setdefault(name_out, {})[name_in] = 0
 
-        # links
+        # links a faire !
         for link in self.connections:
             hub1, hub2 = list(link.hubs)
 
@@ -124,7 +87,6 @@ class Graph:
                 actual_flow = cap - res_cap[u][v]
                 if actual_flow > 0:
                     flow_graph.setdefault(u, {})[v] = actual_flow
-        print(flow_graph)
 
         paths_with_flow: list[dict[str, Any]] = []
         s: str = f"{self.start_name}_out"
@@ -202,6 +164,5 @@ class Graph:
                 res_cap[current][prev] += path_flow
                 current = prev
             max_flow += path_flow
-            print(max_flow)
         paths = self.extract_paths(res_cap, initial_cap)
-        return paths
+        return max_flow, paths
