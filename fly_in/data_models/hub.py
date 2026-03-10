@@ -18,6 +18,7 @@ class Hub:
         self.current_drones: dict[str, Drone] = {}
 
     def get_neighbors(self, connections: list[Connection]) -> list[Hub]:
+        """Si un neighbor == Priority: passe avant les autres ! A AJOUTER"""
         neighbors: list[Hub] = []
         for connection in connections:
             if self in connection.hubs:

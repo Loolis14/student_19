@@ -19,7 +19,12 @@ Visual representation
 
 Parsing : 
 - Vérifier que drones > 0
-- que le start et l'exit sont bien deux sorties différentes.
+- que le start et l'exit sont bien deux sorties différentes !
+
+
+- Ajouter les hub prioritaires dans tous les algo
+
+- Ajouter le fait de ne pas parcourir tous les 
 
 
 Dans drone : progression inutile pour le moment ? 

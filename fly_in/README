@@ -46,3 +46,19 @@ Sans le back-edge, ton algorithme est "têtu" : une fois qu'il a pris une décis
 Min-Cost Max-Flow est exactement l’algorithme qu’il te faut.
 
 A star: https://rosettacode.org/wiki/A*_search_algorithm
+
+https://en.wikipedia.org/wiki/Minimum-cost_flow_problem
+algo Busacker et Gowen: https://fr.wikipedia.org/wiki/Algorithme_de_Busacker_et_Gowen
+
+heapq: https://docs.python.org/3/library/heapq.html
+
+
+MON ALGO
+Je m'inspire de Edmons Karp pour gérer les flux couplé non à un BFS mais à un Dijkstra pour prendre en compte les couts des hubs et faire une priority queue.
+
+Étape du trajet,Ton nouveau get_weight,Pourquoi ?
+HubA_out -> Conn_in,0,C'est juste un lien logique pour entrer dans le tuyau.
+Conn_in -> Conn_out,0,"La connexion limite le flux, mais le ""temps"" est payé à l'arrivée."
+Conn_out -> HubB_in,0,Lien logique.
+HubB_in -> HubB_out,"1, 2 ou 3",C'est ici que tu payes le coût d'entrée dans la destination.
+https://i.imgur.com/qI842em.png

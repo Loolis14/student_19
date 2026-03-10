@@ -51,23 +51,14 @@ class Graph:
         self.hubs[self.start_name].max_capacity = config['nb_drones']
         self.hubs[self.end_name].max_capacity = config['nb_drones']
 
-    def bfs_shortest_path(self) -> Optional[list[Hub]]:
-        start_hub = self.hubs[self.start_name]
-        queu: deque[tuple[Hub, list[Hub]]] = deque([(start_hub, [start_hub])])
-        visited: set[str] = {self.start_name}
-        new_path = []
-
-        while queu:
-            current_hub, path = queu.popleft()
-            if current_hub.name == self.end_name:
-                return path
-            for neighbor in current_hub.get_neighbors(self.connections):
-                if neighbor.name not in visited:
-                    visited.add(neighbor.name)
-                    new_path.append(neighbor)
-                    queu.append((neighbor, new_path))
-        return None
-
     def add_path_to_drone(self, path: list[Hub]) -> None:
         for drone in self.drones.values():
             drone.path = deque(path)
+
+    def str_to_obj(self, path: list[str]) -> list[Hub]:
+        path_in_hub: list[Hub] = []
+        for hub_name in path:
+            if hub_name == self.start_name:
+                continue
+            path_in_hub.append(self.hubs.get(hub_name))
+        return path_in_hub

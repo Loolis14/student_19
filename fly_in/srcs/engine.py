@@ -7,8 +7,7 @@
 # (pour gérer l'output console avec les couleurs demandées).
 from data_models.graph import Graph
 from data_models import Drone, Hub
-from collections import deque
-from copy import copy
+from srcs.pathfinder import Pathfinder
 
 
 class PathError(Exception):
@@ -23,12 +22,18 @@ class Engine:
         self.drone_not_arrived: dict[str, Drone] = {}
         self.drones_moved_stats: list[int] = []
         self.path_cost: int = 0
-        # peut etre voir pour mettre le path ici
+        self.rek: Pathfinder = None
+        self.paths: list[dict[str, list[Hub] | int]] = []
+        self.max_flow: int = 0
 
     def _create_graph(self, config: dict) -> None:
         graph = Graph()
         graph.graph_init_dict_config(config)
         self.graph = graph
+
+    def _create_pathfinder(self, graph: Graph) -> None:
+        rek = Pathfinder(graph)
+        self.rek = rek
 
     def run_bfs(self, path: list[Hub]) -> None:
         self.graph.add_path_to_drone(path)
@@ -53,47 +58,24 @@ class Engine:
             for drone_name in drones_arrived:
                 self.drone_not_arrived.pop(drone_name)
 
-
-
-    def run_simulation(self, path: deque[Hub]) -> None:
-        # Si tous les drones ont le même chemin
-        for drone in self.drone_not_arrived.values():
-            clean_path = copy(path)
-            if clean_path and clean_path[0].name == drone.current_hub.name:
-                clean_path.popleft()
-            drone.path = clean_path
-            drone.progression = len(path)
-        while self.drone_not_arrived:
-            self.turn_total += 1
-            movements_turn = []
-            drone_finished: list[str] = []
-            for drone in self.drone_not_arrived.values():
-                if drone.can_move():
-                    drone.move_to()
-                    self.path_cost += 1
-                    movements_turn.append(
-                        f'{drone.id}-{drone.current_hub.name}'
-                        )
-                    if drone.current_hub.name == self.graph.end_name:
-                        drone_finished.append(drone.id)
-                else:
-                    drone.wait()
-            print(" ".join(movements_turn), self.turn_total)
-            self.drones_moved_stats.append(len(movements_turn))
-            for drone_name in drone_finished:
-                self.drone_not_arrived.pop(drone_name, None)
+    def _paths_str_to_obj(self,
+                          paths: list[dict[str, list[str] | int]]) -> None:
+        """Si c'est une zone restricted, garder la connection, sinon l'enlever!"""
+        for path_dict in paths:
+            path_in_hub = self.graph.str_to_obj(path_dict['path'])
+            path_dict['path'] = path_in_hub
+            self.paths.append(path_dict)
 
     def main(self, config: dict) -> None:
         self._create_graph(config)
         if len(self.graph.drones) == 0:
             print('Mais que faire ??')
-        path: list[Hub] = self.graph.bfs_shortest_path()
-        if not path:
+        self._create_pathfinder(self.graph)
+        max_flow, paths = self.rek.revisited_edmonds_karp()
+        if not paths:
             raise PathError(f"No connection between '{self.graph.start_name}'"
                             f"hub and '{self.graph.end_name}' hub.")
-        if len(self.graph.drones) == 1:
-            self.run_bfs(path)
-        else:
-            print(1)
-        # self._run_edmonds_karp()
-        # self.run_simulation(path)
+        self.max_flow = max_flow
+        print(paths)
+        print(max_flow)
+        # self._paths_str_to_obj(paths)

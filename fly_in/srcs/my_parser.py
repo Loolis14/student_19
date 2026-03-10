@@ -32,13 +32,16 @@ class Parser:
         Read the file and create a list of every line.
         (# and empty line not take in count)
         """
-        with open(file) as f:
-            for i, line in enumerate(f, start=1):
-                line = line.strip()
-                if not line or line.startswith("#"):
-                    continue
-                content = line.split("#")[0].strip()
-                self.lines.append(Line(i, content))
+        try:
+            with open(file) as f:
+                for i, line in enumerate(f, start=1):
+                    line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    content = line.split("#")[0].strip()
+                    self.lines.append(Line(i, content))
+        except FileNotFoundError:
+            raise ConfigError(f"'{file}' file not found.")
 
     def _create_dictionnary(self) -> None:
         """
@@ -141,15 +144,15 @@ class Parser:
 
     def _parse_hub(self, hub_config: Line) -> None:
         """Parse the configuration on hub line."""
-        pattern = re.compile(r"^([^- ]+) (-?\d+) (-?\d+)(?: \[([^\]]+)\])?$")
+        pattern = re.compile(r"^([^- ]+) (\d+) (\d+)(?: \[([^\]]+)\])?$")
         match = pattern.match(hub_config.value)
         if not match:
             raise ConfigError(f"line {hub_config.nb} '{hub_config.value}' not "
                               "a valid syntax\n\n"
                               "Usage: <name> <x> <y> [metadata]\n"
                               "Zone names can use any valid characters but "
-                              "dashes and spaces.\nx and y should be integers."
-                              "\nAll metadata is optional and "
+                              "dashes and spaces.\nx and y should be positive "
+                              "integers.\nAll metadata is optional and "
                               "enclosed in brackets.")
         name, x, y, metadata = match.groups()
         dict_config = {

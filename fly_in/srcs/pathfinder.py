@@ -1,76 +1,15 @@
 from data_models.graph import Graph
-from collections import deque
+from data_models import Hub, Connection
+import heapq
 
 
 class Pathfinder:
 
     def __init__(self, graph: Graph):
-        self.graph: Graph = graph
-
-    def _path_cost(self, path: dict) -> int:
-        return (sum(2 if self.graph.hubs[p].zone_type == 'restricted' else 1
-                    for p in path['path']))
-
-    def _drones_repartition(self, paths: list[dict[str, list | int]]) -> None:
-        for path in paths:
-            path_cost = self._path_cost(path)
-            path['cost'] = path_cost
-        paths.sort(key=lambda p: p['cost'])
-        nb_drones = len(self.graph.drones)
-        acc_drones = 1
-        while acc_drones <= nb_drones:
-            min_path = min(paths, key=lambda x: x['cost'])
-            for _ in range(int(min_path['flow'])):
-                if acc_drones > nb_drones:
-                    break
-                self.graph.drones[f'D{acc_drones}'].path = deque(min_path['path'][1:])
-                self.graph.drones[f'D{acc_drones}'].flow = min_path['flow']
-                self.drone_in_mouvement.add(self.graph.drones[f'D{acc_drones}'])
-                acc_drones += 1
-                min_path['cost'] += 1
-
-    def _run_edmonds_karp(self) -> None:
-        max_flow, paths = self.graph.edmonds_karp()
-        self._drones_repartition(paths)
-        for n, d in self.graph.drones.items():
-            print('drone',d.id)
-            print('path', d.path)
-            print('flow',d.flow)
-            print(max_flow)
-        while self.drone_in_mouvement:
-            self.turn_total += 1
-            movements_turn = []
-            for drone_name, drone in self.graph.drones.items():
-                if drone.can_move(self.graph):
-                    drone.move(self.graph)
-                    self.path_cost += 1
-                    movements_turn.append(
-                        f'{drone_name}-{drone.current_hub.name}'
-                        )
-                    if drone.current_hub.name == self.graph.end_name:
-                        self.drone_in_mouvement.remove(drone)
-                else:
-                    drone.wait()
-            print(" ".join(movements_turn), self.turn_total)
-            self.drones_moved_stats.append(len(movements_turn))
-
-        """while self.drone_in_mouvement:
-            drones_moved = 0
-            while drones_moved < max_flow:
-                first_pack_drone = self.graph.drones[f'D{drones_moved + 1}']
-                for _ in range(first_pack_drone.flow):
-                    drone_to_move = self.graph.drones[f'D{drones_moved + 1}']
-                    print()
-                    print('drone a bouger: ',drone_to_move.id)
-                    print()
-                    drone_to_move.move(self.graph)
-                    drones_moved += 1
-                    if drone_to_move.current_hub.name == self.graph.end_name:
-                        self.drone_in_mouvement.remove(drone_to_move)
-                if drones_moved == max_flow:
-                    self.turn_total += 1
-                print('drones restants: ',self.drone_in_mouvement)
-        print('Tours totaux: ',self.turn_total)"""
+        self.hubs: dict[str, Hub] = graph.hubs
+        self.connections: list[Connection] = graph.connections
+        self.start_name: str = graph.start_name
+        self.end_name: str = graph.end_name
 
     def build_residual_graph(self) -> dict[str, dict[str, int]]:
         res_cap = {}
@@ -82,32 +21,46 @@ class Pathfinder:
             res_cap.setdefault(name_in, {})[name_out] = hub.max_capacity
             res_cap.setdefault(name_out, {})[name_in] = 0
 
-        # links a faire !
         for link in self.connections:
-            hub1, hub2 = list(link.hubs)
+            c_in, c_out = f"{link.id}_in", f"{link.id}_out"
+            res_cap.setdefault(c_in, {})[c_out] = link.max_capacity
+            res_cap.setdefault(c_out, {})[c_in] = 0
 
-            h1_in = f'{hub1.name}_in'
-            h1_out = f'{hub1.name}_out'
-            h2_in = f'{hub2.name}_in'
-            h2_out = f'{hub2.name}_out'
+            # On récupère les deux hubs reliés par cette connection
+            h1, h2 = list(link.hubs)
 
-            res_cap.setdefault(h1_out, {})[h2_in] = link.max_capacity
-            res_cap.setdefault(h2_in, {})[h1_out] = 0
+            # Liaison Hub1 <-> Connection <-> Hub2 (Double sens)
+            # --- Sens 1 : Hub1 vers Hub2 ---
+            # Sortie Hub1 -> Entrée Conn
+            res_cap.setdefault(f"{h1.name}_out", {})[c_in] = float('inf')
+            res_cap.setdefault(c_in, {})[f"{h1.name}_out"] = 0
+            # Sortie Conn -> Entrée Hub2
+            res_cap.setdefault(c_out, {})[f"{h2.name}_in"] = float('inf')
+            res_cap.setdefault(f"{h2.name}_in", {})[c_out] = 0
 
-            res_cap.setdefault(h2_out, {})[h1_in] = link.max_capacity
-            res_cap.setdefault(h1_in, {})[h2_out] = 0
+            # --- Sens 2 : Hub2 vers Hub1 ---
+            res_cap.setdefault(f"{h2.name}_out", {})[c_in] = float('inf')
+            res_cap.setdefault(c_in, {})[f"{h2.name}_out"] = 0
+            res_cap.setdefault(c_out, {})[f"{h1.name}_in"] = float('inf')
+            res_cap.setdefault(f"{h1.name}_in", {})[c_out] = 0
+
         return res_cap
 
     def extract_paths(self, res_cap: dict[str, dict[str, int]],
-                      init_cap: dict[str, dict[str, int]]) -> list[dict[str, list, str, int]]:
+                      init_cap: dict[str, dict[str, int]]
+                      ) -> list[dict[str, list[str] | int]]:
         flow_graph = {}
-        for u in init_cap:
-            for v, cap in init_cap[u].items():
-                actual_flow = cap - res_cap[u][v]
-                if actual_flow > 0:
-                    flow_graph.setdefault(u, {})[v] = actual_flow
+        for u in res_cap:
+            for v, current_res_cap in res_cap[u].items():
+                # Si (v, u) est une arête qui existait au début (Aller)
+                # alors la valeur dans res_cap[u][v] (Retour) est le flot envoyé
+                if v in init_cap and u in init_cap[v]:
+                    # Le flot envoyé de v -> u est stocké dans l'arête de retour u -> v
+                    flow_sent = res_cap[u][v]
+                    if flow_sent > 0:
+                        flow_graph.setdefault(v, {})[u] = flow_sent
 
-        paths_with_flow: list[dict[str, Any]] = []
+        paths_with_flow: list[dict[str, list[str] | int]] = []
         s: str = f"{self.start_name}_out"
         t: str = f"{self.end_name}_in"
 
@@ -144,28 +97,50 @@ class Pathfinder:
             paths_with_flow.append({'path': temp_path, 'flow': bottleneck})
         return paths_with_flow
 
-    def edmonds_karp(self) -> dict:
+    def revisited_edmonds_karp(self) -> dict:
         res_cap = self.build_residual_graph()
-        initial_cap = {u: dict(neighbors) for u, neighbors in res_cap.items()}
+        initial_cap = {u: dict(v) for u, v in res_cap.items()}
         max_flow = 0
         parent: dict = {}
 
-        def bfs() -> bool:
-            visited = {f'{self.start_name}_out'}
-            queue = deque([f'{self.start_name}_out'])
+        def get_weight(curr_name: str, ngbr_name: str) -> int:
+            """Get the zone weight if a cross in hub is made (in -> out)."""
+            curr = "_".join(curr_name.split('_')[:-1])
+            neighbor = "_".join(ngbr_name.split('_')[:-1])
+            for c in self.connections:
+                if c.id == curr or c.id == neighbor:
+                    return 0
+            if "_in" in curr_name and "_out" in ngbr_name and curr == neighbor:
+                zone = self.hubs[curr].zone_type
+                if zone == 'restricted':
+                    return 3
+                if zone == 'priority':
+                    return 1
+                return 2
+            return 0
+
+        def dijkstra() -> bool:
+            start_hub = f'{self.start_name}_out'
+            queue = [(0, start_hub)]
+            min_costs: dict = {start_hub: 0}
             parent.clear()
             while queue:
-                curr_hub_name = queue.popleft()
-                for neighbor_name, capacity in res_cap[curr_hub_name].items():
-                    if neighbor_name not in visited and capacity > 0:
-                        parent[neighbor_name] = curr_hub_name
-                        visited.add(neighbor_name)
-                        if neighbor_name == f'{self.end_name}_in':
-                            return True
-                        queue.append(neighbor_name)
+                curr_cost, curr_name = heapq.heappop(queue)
+                if curr_name == f'{self.end_name}_in':
+                    return True
+                if curr_cost > min_costs.get(curr_name, float('inf')):
+                    continue
+                for ngbr_name, capacity in res_cap[curr_name].items():
+                    if capacity > 0:
+                        weight: int = get_weight(curr_name, ngbr_name)
+                        new_cost = curr_cost + weight
+                        if new_cost < min_costs.get(ngbr_name, float('inf')):
+                            min_costs[ngbr_name] = new_cost
+                            parent[ngbr_name] = curr_name
+                            heapq.heappush(queue, (new_cost, ngbr_name))
             return False
 
-        while bfs():
+        while dijkstra():
             path_flow = float('inf')
             end = f"{self.end_name}_in"
             start = f"{self.start_name}_out"
@@ -185,27 +160,3 @@ class Pathfinder:
             max_flow += path_flow
         paths = self.extract_paths(res_cap, initial_cap)
         return max_flow, paths
-
-    """
-    # AUTRE ALGO
-
-    def find_path_dijkstra(self) -> Optional[list]:
-        start_hub = self.hubs[self.start_name]
-        queue = [(0, id(start_hub), start_hub, [start_hub])]
-        min_costs: dict = {self.start_name: 0}
-        while queue:
-            current_cost, _, current_hub, path = heapq.heappop(queue)
-            if current_hub.name == self.end_name:
-                return path
-            if current_cost > min_costs.get(current_hub.name, float('inf')):
-                continue
-            for neighbor in current_hub.get_neighbors(self.connections):
-                weight = 2 if neighbor.zone_type == 'restricted' else 1
-                new_cost = current_cost + weight
-                if new_cost < min_costs.get(neighbor.name, float('inf')):
-                    min_costs[neighbor.name] = new_cost
-                    new_path = path + [neighbor]
-                    heapq.heappush(queue, (new_cost, id(neighbor),
-                                            neighbor, new_path))
-        return None
-    """

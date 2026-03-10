@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 class Connection:
     def __init__(self, id: str, hub_a: Hub, hub_b: Hub, max_link: int):
         self.id: str = id
-        self.hubs: set = {hub_a, hub_b}
+        self.hubs: set[Hub] = {hub_a, hub_b}
         self.max_capacity: int = max_link
         self.current_drones: dict[str, Drone] = {}
 
