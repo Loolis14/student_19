@@ -58,6 +58,19 @@ class Engine:
             for drone_name in drones_arrived:
                 self.drone_not_arrived.pop(drone_name)
 
+    def add_weight(self) -> None:
+        for path in self.paths:
+            path['weight'] = len(path['path'])
+
+    def drones_spread(self) -> None:
+        """Drones spread."""
+        self.drone_not_arrived = {n: d for n, d in self.graph.drones.items()}
+        self.add_weight()
+        for drone in self.drone_not_arrived.values():
+            min_path = min(self.paths, key=lambda p: p['weight'])
+            drone.add_path(min_path)
+            min_path['weight'] += 1
+
     def _paths_str_to_obj(self,
                           paths: list[dict[str, list[str] | int]]) -> None:
         """Transform str name in object."""
@@ -65,6 +78,27 @@ class Engine:
             path_in_hub = self.graph.str_to_obj(path_dict['path'])
             path_dict['path'] = path_in_hub
             self.paths.append(path_dict)
+
+    def run_simulation(self) -> None:
+        while self.drone_not_arrived:
+            self.turn_total += 1
+            movements_turn = []
+            drones_arrived = []
+            for drone_name, drone in self.drone_not_arrived.items():
+                if drone.can_move():
+                    drone.move_to()
+                    self.path_cost += 1
+                    movements_turn.append(
+                        f'{drone_name}-{drone.current_hub.name}'
+                        )
+                    if drone.current_hub.name == self.graph.end_name:
+                        drones_arrived.append(drone_name)
+                else:
+                    drone.wait()
+            print(" ".join(movements_turn), self.turn_total)
+            self.drones_moved_stats.append(len(movements_turn))
+            for drone_name in drones_arrived:
+                self.drone_not_arrived.pop(drone_name)
 
     def main(self, config: dict) -> None:
         self._create_graph(config)
@@ -77,5 +111,6 @@ class Engine:
                             f"hub and '{self.graph.end_name}' hub.")
         self.max_flow = max_flow
         self._paths_str_to_obj(paths)
-        # repartir les drones, leur donner leur path
+        self.drones_spread()
+        self.run_simulation()
         # déplacer les drones et afficher le message

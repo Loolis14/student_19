@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from data_models.hub import Hub
     from data_models.graph import Graph
+    from data_models.connection import Connection
 
 from collections import deque
 
@@ -14,12 +15,14 @@ class Drone:
         self.id: str = id
         self.current_hub: Hub = start_hub
         self.path: deque[Hub] = deque()
-        self.flow: int = 0
         self.progression: int = 0
         self.turn_drone = 0
 
         # a voir ?
         self.state = 0
+
+    def add_path(self, path: list[Hub | Connection]):
+        self.path = deque(path)
 
     def wait(self):
         self.turn_drone += 1
