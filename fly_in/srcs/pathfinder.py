@@ -1,57 +1,76 @@
-from data_models import Connection, Drone, Hub
+from data_models.graph import Graph
 from collections import deque
-from typing import Optional, Any
-import heapq
-from copy import deepcopy
-# Méthodes utiles :
-# get_neighbors(zone), get_connection_between(zone_a, zone_b).
 
 
-class Graph:
+class Pathfinder:
 
-    def __init__(self) -> None:
-        self.drones: dict[str, Drone] = {}
-        self.connections: list[Connection] = []
-        self.start_name: str = ''
-        self.end_name: str = ''
-        self.hubs: dict[str, Hub] = {}
+    def __init__(self, graph: Graph):
+        self.graph: Graph = graph
 
-    def add_hub(self, config: dict, type: str) -> None:
-        hub_name = config['name']
-        new_hub = Hub(hub_name, config)
-        self.hubs[hub_name] = new_hub
-        match type:
-            case 'start_hub':
-                self.start_name = hub_name
-            case 'end_hub':
-                self.end_name = hub_name
+    def _path_cost(self, path: dict) -> int:
+        return (sum(2 if self.graph.hubs[p].zone_type == 'restricted' else 1
+                    for p in path['path']))
 
-    def add_drones(self, nb_drones: int) -> None:
-        start_hub = self.hubs[self.start_name]
-        for i in range(nb_drones):
-            new_drone = Drone(f'D{i + 1}', start_hub)
-            self.drones[new_drone.id] = new_drone
-            self.hubs[start_hub.name].current_drones[new_drone.id] = new_drone
+    def _drones_repartition(self, paths: list[dict[str, list | int]]) -> None:
+        for path in paths:
+            path_cost = self._path_cost(path)
+            path['cost'] = path_cost
+        paths.sort(key=lambda p: p['cost'])
+        nb_drones = len(self.graph.drones)
+        acc_drones = 1
+        while acc_drones <= nb_drones:
+            min_path = min(paths, key=lambda x: x['cost'])
+            for _ in range(int(min_path['flow'])):
+                if acc_drones > nb_drones:
+                    break
+                self.graph.drones[f'D{acc_drones}'].path = deque(min_path['path'][1:])
+                self.graph.drones[f'D{acc_drones}'].flow = min_path['flow']
+                self.drone_in_mouvement.add(self.graph.drones[f'D{acc_drones}'])
+                acc_drones += 1
+                min_path['cost'] += 1
 
-    def add_connections(self, config: list[tuple[Hub, Hub, int]]) -> None:
-        i = 1
-        for tuple_connection in config:
-            hub_a_name, hub_b_name, max_capacity = tuple_connection
-            hub_a = self.hubs[hub_a_name]
-            hub_b = self.hubs[hub_b_name]
-            new_connection = Connection(f'C{i}', hub_a, hub_b, max_capacity)
-            i += 1
-            self.connections.append(new_connection)
+    def _run_edmonds_karp(self) -> None:
+        max_flow, paths = self.graph.edmonds_karp()
+        self._drones_repartition(paths)
+        for n, d in self.graph.drones.items():
+            print('drone',d.id)
+            print('path', d.path)
+            print('flow',d.flow)
+            print(max_flow)
+        while self.drone_in_mouvement:
+            self.turn_total += 1
+            movements_turn = []
+            for drone_name, drone in self.graph.drones.items():
+                if drone.can_move(self.graph):
+                    drone.move(self.graph)
+                    self.path_cost += 1
+                    movements_turn.append(
+                        f'{drone_name}-{drone.current_hub.name}'
+                        )
+                    if drone.current_hub.name == self.graph.end_name:
+                        self.drone_in_mouvement.remove(drone)
+                else:
+                    drone.wait()
+            print(" ".join(movements_turn), self.turn_total)
+            self.drones_moved_stats.append(len(movements_turn))
 
-    def graph_init_dict_config(self, config: dict) -> None:
-        self.add_hub(config['start_hub'], 'start_hub')
-        self.add_hub(config['end_hub'], 'end_hub')
-        for hub in config['hub']:
-            self.add_hub(hub, 'hub')
-        self.add_drones(config['nb_drones'])
-        self.add_connections(config['connection'])
-        self.hubs[self.start_name].max_capacity = config['nb_drones']
-        self.hubs[self.end_name].max_capacity = config['nb_drones']
+        """while self.drone_in_mouvement:
+            drones_moved = 0
+            while drones_moved < max_flow:
+                first_pack_drone = self.graph.drones[f'D{drones_moved + 1}']
+                for _ in range(first_pack_drone.flow):
+                    drone_to_move = self.graph.drones[f'D{drones_moved + 1}']
+                    print()
+                    print('drone a bouger: ',drone_to_move.id)
+                    print()
+                    drone_to_move.move(self.graph)
+                    drones_moved += 1
+                    if drone_to_move.current_hub.name == self.graph.end_name:
+                        self.drone_in_mouvement.remove(drone_to_move)
+                if drones_moved == max_flow:
+                    self.turn_total += 1
+                print('drones restants: ',self.drone_in_mouvement)
+        print('Tours totaux: ',self.turn_total)"""
 
     def build_residual_graph(self) -> dict[str, dict[str, int]]:
         res_cap = {}
@@ -166,3 +185,27 @@ class Graph:
             max_flow += path_flow
         paths = self.extract_paths(res_cap, initial_cap)
         return max_flow, paths
+
+    """
+    # AUTRE ALGO
+
+    def find_path_dijkstra(self) -> Optional[list]:
+        start_hub = self.hubs[self.start_name]
+        queue = [(0, id(start_hub), start_hub, [start_hub])]
+        min_costs: dict = {self.start_name: 0}
+        while queue:
+            current_cost, _, current_hub, path = heapq.heappop(queue)
+            if current_hub.name == self.end_name:
+                return path
+            if current_cost > min_costs.get(current_hub.name, float('inf')):
+                continue
+            for neighbor in current_hub.get_neighbors(self.connections):
+                weight = 2 if neighbor.zone_type == 'restricted' else 1
+                new_cost = current_cost + weight
+                if new_cost < min_costs.get(neighbor.name, float('inf')):
+                    min_costs[neighbor.name] = new_cost
+                    new_path = path + [neighbor]
+                    heapq.heappush(queue, (new_cost, id(neighbor),
+                                            neighbor, new_path))
+        return None
+    """

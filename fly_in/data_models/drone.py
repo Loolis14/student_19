@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from data_models.hub import Hub
+    from data_models.graph import Graph
 
 from collections import deque
 
@@ -13,6 +14,7 @@ class Drone:
         self.id: str = id
         self.current_hub: Hub = start_hub
         self.path: deque[Hub] = deque()
+        self.flow: int = 0
         self.progression: int = 0
         self.turn_drone = 0
 
@@ -38,6 +40,17 @@ class Drone:
             pass  # a voir quoi faire
         else:
             current_hub.current_drones.pop(self.id, None)
+            self.current_hub = destination
+            destination.current_drones[self.id] = self
+            self.progression -= 1
+            self.turn_drone += 1
+
+    def move(self, graph: Graph) -> None:
+        destination = graph.hubs[self.path.popleft()]
+        if destination.zone_type == 'restricted':
+            pass  # a voir quoi faire peut etre ajouter la connection dans le pass ?
+        else:
+            self.current_hub.current_drones.pop(self.id, None)
             self.current_hub = destination
             destination.current_drones[self.id] = self
             self.progression -= 1

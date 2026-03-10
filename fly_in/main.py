@@ -3,8 +3,8 @@ main program.
 """
 
 import sys
-from my_parser import Parser, ConfigError
-from engine import Engine, PathError
+from srcs.my_parser import Parser, ConfigError
+from srcs.engine import Engine, PathError
 
 
 if __name__ == "__main__":

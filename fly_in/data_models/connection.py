@@ -16,4 +16,4 @@ class Connection:
         self.current_drones: dict[str, Drone] = {}
 
     def get_neighbors(self):  # peut être avoir le hub où il doit aller ?
-        pass
+        return self.hubs - self
