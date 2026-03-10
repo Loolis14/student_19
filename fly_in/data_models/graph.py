@@ -1,6 +1,5 @@
 from data_models import Connection, Drone, Hub
 from collections import deque
-from typing import Optional
 # Méthodes utiles :
 # get_neighbors(zone), get_connection_between(zone_a, zone_b).
 
@@ -9,7 +8,7 @@ class Graph:
 
     def __init__(self) -> None:
         self.drones: dict[str, Drone] = {}
-        self.connections: list[Connection] = []
+        self.connections: dict[str, Connection] = {}
         self.start_name: str = ''
         self.end_name: str = ''
         self.hubs: dict[str, Hub] = {}
@@ -38,8 +37,8 @@ class Graph:
             hub_a = self.hubs[hub_a_name]
             hub_b = self.hubs[hub_b_name]
             new_connection = Connection(f'C{i}', hub_a, hub_b, max_capacity)
+            self.connections[f'C{i}'] = new_connection
             i += 1
-            self.connections.append(new_connection)
 
     def graph_init_dict_config(self, config: dict) -> None:
         self.add_hub(config['start_hub'], 'start_hub')
@@ -55,10 +54,14 @@ class Graph:
         for drone in self.drones.values():
             drone.path = deque(path)
 
-    def str_to_obj(self, path: list[str]) -> list[Hub]:
-        path_in_hub: list[Hub] = []
-        for hub_name in path:
-            if hub_name == self.start_name:
+    def str_to_obj(self, path: list[str]) -> list[Hub | Connection]:
+        path_in_obj: list[Hub] = []
+        len_path = len(path)
+        for i in range(0, len_path, 2):
+            if path[i] == self.start_name:
                 continue
-            path_in_hub.append(self.hubs.get(hub_name))
-        return path_in_hub
+            hub = self.hubs[path[i]]
+            if hub.zone_type == 'restricted':
+                path_in_obj.append(self.connections[path[i - 1]])
+            path_in_obj.append(hub)
+        return path_in_obj

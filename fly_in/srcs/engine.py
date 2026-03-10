@@ -6,7 +6,7 @@
 # Méthodes utiles : run(), execute_turn(), print_state()
 # (pour gérer l'output console avec les couleurs demandées).
 from data_models.graph import Graph
-from data_models import Drone, Hub
+from data_models import Drone, Hub, Connection
 from srcs.pathfinder import Pathfinder
 
 
@@ -23,7 +23,7 @@ class Engine:
         self.drones_moved_stats: list[int] = []
         self.path_cost: int = 0
         self.rek: Pathfinder = None
-        self.paths: list[dict[str, list[Hub] | int]] = []
+        self.paths: list[dict[str, list[Hub | Connection] | int]] = []
         self.max_flow: int = 0
 
     def _create_graph(self, config: dict) -> None:
@@ -60,7 +60,7 @@ class Engine:
 
     def _paths_str_to_obj(self,
                           paths: list[dict[str, list[str] | int]]) -> None:
-        """Si c'est une zone restricted, garder la connection, sinon l'enlever!"""
+        """Transform str name in object."""
         for path_dict in paths:
             path_in_hub = self.graph.str_to_obj(path_dict['path'])
             path_dict['path'] = path_in_hub
@@ -76,6 +76,6 @@ class Engine:
             raise PathError(f"No connection between '{self.graph.start_name}'"
                             f"hub and '{self.graph.end_name}' hub.")
         self.max_flow = max_flow
-        print(paths)
-        print(max_flow)
-        # self._paths_str_to_obj(paths)
+        self._paths_str_to_obj(paths)
+        # repartir les drones, leur donner leur path
+        # déplacer les drones et afficher le message

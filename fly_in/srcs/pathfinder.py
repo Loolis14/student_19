@@ -1,13 +1,14 @@
 from data_models.graph import Graph
 from data_models import Hub, Connection
 import heapq
+from collections import deque
 
 
 class Pathfinder:
 
     def __init__(self, graph: Graph):
         self.hubs: dict[str, Hub] = graph.hubs
-        self.connections: list[Connection] = graph.connections
+        self.connections: dict[str, Connection] = graph.connections
         self.start_name: str = graph.start_name
         self.end_name: str = graph.end_name
 
@@ -21,27 +22,25 @@ class Pathfinder:
             res_cap.setdefault(name_in, {})[name_out] = hub.max_capacity
             res_cap.setdefault(name_out, {})[name_in] = 0
 
-        for link in self.connections:
-            c_in, c_out = f"{link.id}_in", f"{link.id}_out"
+        for link_id, link in self.connections.items():
+            c_in, c_out = f"{link_id}_in", f"{link_id}_out"
             res_cap.setdefault(c_in, {})[c_out] = link.max_capacity
             res_cap.setdefault(c_out, {})[c_in] = 0
 
-            # On récupère les deux hubs reliés par cette connection
             h1, h2 = list(link.hubs)
 
-            # Liaison Hub1 <-> Connection <-> Hub2 (Double sens)
             # --- Sens 1 : Hub1 vers Hub2 ---
             # Sortie Hub1 -> Entrée Conn
-            res_cap.setdefault(f"{h1.name}_out", {})[c_in] = float('inf')
+            res_cap.setdefault(f"{h1.name}_out", {})[c_in] = link.max_capacity
             res_cap.setdefault(c_in, {})[f"{h1.name}_out"] = 0
             # Sortie Conn -> Entrée Hub2
-            res_cap.setdefault(c_out, {})[f"{h2.name}_in"] = float('inf')
+            res_cap.setdefault(c_out, {})[f"{h2.name}_in"] = link.max_capacity
             res_cap.setdefault(f"{h2.name}_in", {})[c_out] = 0
 
             # --- Sens 2 : Hub2 vers Hub1 ---
-            res_cap.setdefault(f"{h2.name}_out", {})[c_in] = float('inf')
+            res_cap.setdefault(f"{h2.name}_out", {})[c_in] = link.max_capacity
             res_cap.setdefault(c_in, {})[f"{h2.name}_out"] = 0
-            res_cap.setdefault(c_out, {})[f"{h1.name}_in"] = float('inf')
+            res_cap.setdefault(c_out, {})[f"{h1.name}_in"] = link.max_capacity
             res_cap.setdefault(f"{h1.name}_in", {})[c_out] = 0
 
         return res_cap
@@ -51,27 +50,25 @@ class Pathfinder:
                       ) -> list[dict[str, list[str] | int]]:
         flow_graph = {}
         for u in res_cap:
-            for v, current_res_cap in res_cap[u].items():
-                # Si (v, u) est une arête qui existait au début (Aller)
-                # alors la valeur dans res_cap[u][v] (Retour) est le flot envoyé
+            for v in res_cap[u]:
                 if v in init_cap and u in init_cap[v]:
-                    # Le flot envoyé de v -> u est stocké dans l'arête de retour u -> v
-                    flow_sent = res_cap[u][v]
-                    if flow_sent > 0:
-                        flow_graph.setdefault(v, {})[u] = flow_sent
+                    if init_cap[u][v] == 0:
+                        flow_sent = res_cap[u][v]
+                        if flow_sent > 0:
+                            flow_graph.setdefault(v, {})[u] = flow_sent
 
         paths_with_flow: list[dict[str, list[str] | int]] = []
         s: str = f"{self.start_name}_out"
         t: str = f"{self.end_name}_in"
 
         while True:
-            stack = [(s, float('inf'))]
+            queue = deque([(s, float('inf'))])
             visited = {s: None}
             found_path = False
-            bottleneck = float('inf')
+            bottleneck = 0
 
-            while stack:
-                curr, curr_flow = stack.pop()
+            while queue:
+                curr, curr_flow = queue.popleft()
                 if curr == t:
                     bottleneck = curr_flow
                     found_path = True
@@ -79,8 +76,8 @@ class Pathfinder:
                 for neighbor, flow in flow_graph.get(curr, {}).items():
                     if flow > 0 and neighbor not in visited:
                         visited[neighbor] = curr
-                        stack.append((neighbor, min(curr_flow, flow)))
-            if not found_path:
+                        queue.append((neighbor, min(curr_flow, flow)))
+            if not found_path or bottleneck == 0:
                 break
 
             curr = t
@@ -107,9 +104,11 @@ class Pathfinder:
             """Get the zone weight if a cross in hub is made (in -> out)."""
             curr = "_".join(curr_name.split('_')[:-1])
             neighbor = "_".join(ngbr_name.split('_')[:-1])
-            for c in self.connections:
+            if self.connections.get(curr) or self.connections.get(curr):
+                return 0
+            """ for c in self.connections:
                 if c.id == curr or c.id == neighbor:
-                    return 0
+                    return 0 """
             if "_in" in curr_name and "_out" in ngbr_name and curr == neighbor:
                 zone = self.hubs[curr].zone_type
                 if zone == 'restricted':

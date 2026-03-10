@@ -225,3 +225,54 @@ class Pathfinder:
                     new_path.append(neighbor)
                     queu.append((neighbor, new_path))
         return None
+    
+	def extract_paths(self, res_cap: dict[str, dict[str, int]],
+                      init_cap: dict[str, dict[str, int]]
+                      ) -> list[dict[str, list[str] | int]]:
+        flow_graph = {}
+        for u in res_cap:
+            for v, current_res_cap in res_cap[u].items():
+                # Si (v, u) est une arête qui existait au début (Aller)
+                # alors la valeur dans res_cap[u][v] (Retour) est le flot envoyé
+                if v in init_cap and u in init_cap[v]:
+                    # Le flot envoyé de v -> u est stocké dans l'arête de retour u -> v
+                    flow = init_cap[v][u] - res_cap[v][u]
+                    if flow > 0:
+                        flow_graph.setdefault(v, {})[u] = flow
+
+        paths_with_flow: list[dict[str, list[str] | int]] = []
+        s: str = f"{self.start_name}_out"
+        t: str = f"{self.end_name}_in"
+
+        while True:
+            stack = [(s, float('inf'))]
+            visited = {s: None}
+            found_path = False
+            bottleneck = float('inf')
+
+            while stack:
+                curr, curr_flow = stack.pop()
+                if curr == t:
+                    bottleneck = curr_flow
+                    found_path = True
+                    break
+                for neighbor, flow in flow_graph.get(curr, {}).items():
+                    if flow > 0 and neighbor not in visited:
+                        visited[neighbor] = curr
+                        stack.append((neighbor, min(curr_flow, flow)))
+            if not found_path:
+                break
+
+            curr = t
+            temp_path = []
+            while curr:
+                clean_name = "_".join(curr.split('_')[:-1])
+                if not temp_path or temp_path[-1] != clean_name:
+                    temp_path.append(clean_name)
+                prev = visited[curr]
+                if prev:
+                    flow_graph[prev][curr] -= bottleneck
+                curr = prev
+            temp_path.reverse()
+            paths_with_flow.append({'path': temp_path, 'flow': bottleneck})
+        return paths_with_flow
