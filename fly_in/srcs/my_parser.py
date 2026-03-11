@@ -124,7 +124,8 @@ class Parser:
                                   "\nUsage: <zone|color|max_drones>=<value>")
             key, value = pattern.match(match).groups()
             if key == 'zone':
-                if value not in ['blocked', 'normal', 'restricted', 'prority']:
+                zone_type = ['blocked', 'normal', 'restricted', 'priority']
+                if value not in zone_type:
                     raise ConfigError(f"line {line} '{value}' not valid.\n"
                                       "Zone types must be one of: normal, "
                                       "blocked, restricted, priority.")
@@ -144,15 +145,15 @@ class Parser:
 
     def _parse_hub(self, hub_config: Line) -> None:
         """Parse the configuration on hub line."""
-        pattern = re.compile(r"^([^- ]+) (\d+) (\d+)(?: \[([^\]]+)\])?$")
+        pattern = re.compile(r"^([^- ]+) (-?\d+) (-?\d+)(?: \[([^\]]+)\])?$")
         match = pattern.match(hub_config.value)
         if not match:
             raise ConfigError(f"line {hub_config.nb} '{hub_config.value}' not "
                               "a valid syntax\n\n"
                               "Usage: <name> <x> <y> [metadata]\n"
                               "Zone names can use any valid characters but "
-                              "dashes and spaces.\nx and y should be positive "
-                              "integers.\nAll metadata is optional and "
+                              "dashes and spaces.\nx and y should be integers."
+                              "\nAll metadata is optional and "
                               "enclosed in brackets.")
         name, x, y, metadata = match.groups()
         dict_config = {

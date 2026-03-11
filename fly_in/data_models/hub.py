@@ -10,15 +10,14 @@ if TYPE_CHECKING:
 class Hub:
     def __init__(self, position: str, dict: dict) -> None:
         self.position: str = position
-        self.name: str = dict['name']
+        self.id: str = dict['name']
         self.coord: tuple[int] = (dict['x'], dict['y'])
         self.zone_type: str = dict['zone']
         self.color: str = dict['color']
         self.max_capacity: int = dict['max_drones']
         self.current_drones: dict[str, Drone] = {}
 
-    def get_neighbors(self, connections: list[Connection]) -> list[Hub]:
-        """Si un neighbor == Priority: passe avant les autres ! A AJOUTER"""
+    def _get_neighbors(self, connections: list[Connection]) -> list[Hub]:
         neighbors: list[Hub] = []
         for connection in connections:
             if self in connection.hubs:

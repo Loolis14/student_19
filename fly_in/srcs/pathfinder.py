@@ -12,15 +12,15 @@ class Pathfinder:
         self.start_name: str = graph.start_name
         self.end_name: str = graph.end_name
 
-    def build_residual_graph(self) -> dict[str, dict[str, int]]:
+    def _build_residual_graph(self) -> dict[str, dict[str, int]]:
         res_cap = {}
-        for hub_name, hub in self.hubs.items():
-            name_in = f'{hub_name}_in'
-            name_out = f'{hub_name}_out'
+        for hub_id, hub in self.hubs.items():
+            id_in = f'{hub_id}_in'
+            id_out = f'{hub_id}_out'
 
             # Capacity of Hub (Node Splitting)
-            res_cap.setdefault(name_in, {})[name_out] = hub.max_capacity
-            res_cap.setdefault(name_out, {})[name_in] = 0
+            res_cap.setdefault(id_in, {})[id_out] = hub.max_capacity
+            res_cap.setdefault(id_out, {})[id_in] = 0
 
         for link_id, link in self.connections.items():
             c_in, c_out = f"{link_id}_in", f"{link_id}_out"
@@ -31,23 +31,23 @@ class Pathfinder:
 
             # --- Sens 1 : Hub1 vers Hub2 ---
             # Sortie Hub1 -> Entrée Conn
-            res_cap.setdefault(f"{h1.name}_out", {})[c_in] = link.max_capacity
-            res_cap.setdefault(c_in, {})[f"{h1.name}_out"] = 0
+            res_cap.setdefault(f"{h1.id}_out", {})[c_in] = link.max_capacity
+            res_cap.setdefault(c_in, {})[f"{h1.id}_out"] = 0
             # Sortie Conn -> Entrée Hub2
-            res_cap.setdefault(c_out, {})[f"{h2.name}_in"] = link.max_capacity
-            res_cap.setdefault(f"{h2.name}_in", {})[c_out] = 0
+            res_cap.setdefault(c_out, {})[f"{h2.id}_in"] = link.max_capacity
+            res_cap.setdefault(f"{h2.id}_in", {})[c_out] = 0
 
             # --- Sens 2 : Hub2 vers Hub1 ---
-            res_cap.setdefault(f"{h2.name}_out", {})[c_in] = link.max_capacity
-            res_cap.setdefault(c_in, {})[f"{h2.name}_out"] = 0
-            res_cap.setdefault(c_out, {})[f"{h1.name}_in"] = link.max_capacity
-            res_cap.setdefault(f"{h1.name}_in", {})[c_out] = 0
+            res_cap.setdefault(f"{h2.id}_out", {})[c_in] = link.max_capacity
+            res_cap.setdefault(c_in, {})[f"{h2.id}_out"] = 0
+            res_cap.setdefault(c_out, {})[f"{h1.id}_in"] = link.max_capacity
+            res_cap.setdefault(f"{h1.id}_in", {})[c_out] = 0
 
         return res_cap
 
-    def extract_paths(self, res_cap: dict[str, dict[str, int]],
-                      init_cap: dict[str, dict[str, int]]
-                      ) -> list[dict[str, list[str] | int]]:
+    def _extract_paths(self, res_cap: dict[str, dict[str, int]],
+                       init_cap: dict[str, dict[str, int]]
+                       ) -> list[dict[str, list[str] | int]]:
         flow_graph = {}
         for u in res_cap:
             for v in res_cap[u]:
@@ -94,22 +94,22 @@ class Pathfinder:
             paths_with_flow.append({'path': temp_path, 'flow': bottleneck})
         return paths_with_flow
 
-    def revisited_edmonds_karp(self) -> dict:
-        res_cap = self.build_residual_graph()
+    def _revisited_edmonds_karp(self) -> dict:
+        res_cap = self._build_residual_graph()
         initial_cap = {u: dict(v) for u, v in res_cap.items()}
         max_flow = 0
         parent: dict = {}
 
-        def get_weight(curr_name: str, ngbr_name: str) -> int:
+        def _get_weight(curr_id: str, ngbr_id: str) -> int:
             """Get the zone weight if a cross in hub is made (in -> out)."""
-            curr = "_".join(curr_name.split('_')[:-1])
-            neighbor = "_".join(ngbr_name.split('_')[:-1])
+            curr = "_".join(curr_id.split('_')[:-1])
+            neighbor = "_".join(ngbr_id.split('_')[:-1])
             if self.connections.get(curr) or self.connections.get(curr):
                 return 0
             """ for c in self.connections:
                 if c.id == curr or c.id == neighbor:
                     return 0 """
-            if "_in" in curr_name and "_out" in ngbr_name and curr == neighbor:
+            if "_in" in curr_id and "_out" in ngbr_id and curr == neighbor:
                 zone = self.hubs[curr].zone_type
                 if zone == 'restricted':
                     return 3
@@ -118,28 +118,28 @@ class Pathfinder:
                 return 2
             return 0
 
-        def dijkstra() -> bool:
+        def _dijkstra() -> bool:
             start_hub = f'{self.start_name}_out'
             queue = [(0, start_hub)]
             min_costs: dict = {start_hub: 0}
             parent.clear()
             while queue:
-                curr_cost, curr_name = heapq.heappop(queue)
-                if curr_name == f'{self.end_name}_in':
+                curr_cost, curr_id = heapq.heappop(queue)
+                if curr_id == f'{self.end_name}_in':
                     return True
-                if curr_cost > min_costs.get(curr_name, float('inf')):
+                if curr_cost > min_costs.get(curr_id, float('inf')):
                     continue
-                for ngbr_name, capacity in res_cap[curr_name].items():
+                for ngbr_id, capacity in res_cap[curr_id].items():
                     if capacity > 0:
-                        weight: int = get_weight(curr_name, ngbr_name)
+                        weight: int = _get_weight(curr_id, ngbr_id)
                         new_cost = curr_cost + weight
-                        if new_cost < min_costs.get(ngbr_name, float('inf')):
-                            min_costs[ngbr_name] = new_cost
-                            parent[ngbr_name] = curr_name
-                            heapq.heappush(queue, (new_cost, ngbr_name))
+                        if new_cost < min_costs.get(ngbr_id, float('inf')):
+                            min_costs[ngbr_id] = new_cost
+                            parent[ngbr_id] = curr_id
+                            heapq.heappush(queue, (new_cost, ngbr_id))
             return False
 
-        while dijkstra():
+        while _dijkstra():
             path_flow = float('inf')
             end = f"{self.end_name}_in"
             start = f"{self.start_name}_out"
@@ -157,5 +157,5 @@ class Pathfinder:
                 res_cap[current][prev] += path_flow
                 current = prev
             max_flow += path_flow
-        paths = self.extract_paths(res_cap, initial_cap)
+        paths = self._extract_paths(res_cap, initial_cap)
         return max_flow, paths
