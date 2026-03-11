@@ -62,3 +62,7 @@ Conn_in -> Conn_out,0,"La connexion limite le flux, mais le ""temps"" est payé 
 Conn_out -> HubB_in,0,Lien logique.
 HubB_in -> HubB_out,"1, 2 ou 3",C'est ici que tu payes le coût d'entrée dans la destination.
 https://i.imgur.com/qI842em.png
+
+
+Interface graphique pygame:
+https://www.youtube.com/watch?v=WxEmflz009U&t=107s

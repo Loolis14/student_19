@@ -13,10 +13,11 @@ class Engine:
 
     def __init__(self) -> None:
         self.turn_total: int = 0
+        self.total_path_cost: int = 0
+        self.total_moved: int = 0
         self.graph: Graph = None
         self.drones_in_mouvement: list[Drone] = []
         self.drones_at_start: list[Drone] = []
-        self.drones_moved_stats: list[int] = []
         self.rek: Pathfinder = None
         self.paths: list[dict[str, list[Hub | Connection] | int]] = []
         self.max_flow: int = 0
@@ -67,13 +68,17 @@ class Engine:
                     break
                 drone = self.drones_at_start.pop()
                 drone._add_path(min_path['path'])
+                self.total_path_cost += len(drone.path)
                 if drone._can_move():
                     self.drones_in_mouvement.append(drone)
                     drone._move()
                     drones_moved.append(drone)
                     min_path['weight'] += 1
                 else:
-                    drone.wait()
+                    drone._wait()
+        for drone in self.drones_at_start:
+            if drone not in drones_moved:
+                drone._wait()
         return drones_moved
 
     def _run_turns(self) -> None:
@@ -89,12 +94,25 @@ class Engine:
                 if drone.current_hub.id == self.graph.end_name:
                     if drone in self.drones_in_mouvement:
                         self.drones_in_mouvement.remove(drone)
-            print(" ".join(movements_turn), self.turn_total)
+            self.total_moved += len(drone_moved)
+            print(f'Tour {self.turn_total}:', " ".join(movements_turn))
+
+    def _stats(self) -> None:
+        drones = self.graph.drones
+        acc_turn_drone: int = sum(d.turn_drone for d in drones.values())
+        average = acc_turn_drone / len(drones)
+        efficiency = self.total_moved // self.turn_total
+
+        print('\n=== Additionnal evaluation metrics ===')
+        print(f'Efficiency of path allocation: {efficiency} '
+              'drones per tour in average')
+        print(f'Average number of turns per drone: {average:.2f}')
+        print('Total path cost:', self.total_path_cost)
 
     def main(self, config: dict) -> None:
         self._create_graph(config)
         if len(self.graph.drones) == 0:
-            print('Mais que faire ??')
+            print('No drone, no simulation needed.')
         else:
             self._create_pathfinder(self.graph)
             max_flow, paths = self.rek._revisited_edmonds_karp()
@@ -103,5 +121,7 @@ class Engine:
                                 f"'{self.graph.start_name}'"
                                 f"hub and '{self.graph.end_name}' hub.")
             self.max_flow = max_flow
+            print(max_flow)
             self._paths_str_to_obj(paths)
             self._run_turns()
+            self._stats()
