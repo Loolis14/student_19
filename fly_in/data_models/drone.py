@@ -11,7 +11,7 @@ from collections import deque
 class Drone:
     def __init__(self, id: str, start_hub: Hub) -> None:
         self.id: str = id
-        self.current_hub: Hub = start_hub
+        self.current_pos: Hub = start_hub
         self.path: deque[Hub | Connection] = deque()
         self.turn_drone = 0
 
@@ -29,7 +29,7 @@ class Drone:
 
     def _move(self) -> None:
         destination: Hub | Connection = self.path.popleft()
-        self.current_hub.current_drones.pop(self.current_hub.id, None)
+        self.current_pos.current_drones.pop(self.current_pos.id, None)
         destination.current_drones[destination.id] = destination
-        self.current_hub = destination
+        self.current_pos = destination
         self.turn_drone += 1

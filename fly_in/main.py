@@ -22,6 +22,6 @@ if __name__ == "__main__":
     my_engine = Engine()
     try:
         my_engine.main(config)
-    except PathError as e:
+    except (PathError, ImportError) as e:
         print(e)
         sys.exit(1)

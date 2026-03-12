@@ -64,5 +64,9 @@ HubB_in -> HubB_out,"1, 2 ou 3",C'est ici que tu payes le coût d'entrée dans l
 https://i.imgur.com/qI842em.png
 
 
-Interface graphique pygame:
-https://www.youtube.com/watch?v=WxEmflz009U&t=107s
+Interface graphique tkinter:
+https://youtu.be/Tg13zZ_srwU?t=87
+
+https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.plot.html#matplotlib.axes.Axes.plot
+
+https://matplotlib.org/

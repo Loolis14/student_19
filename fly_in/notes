@@ -35,3 +35,8 @@ Dans drone : progression inutile pour le moment ?
 - remplacer tous les copy par des list en compréhension ?
 
 - écrire Edmons-Karp en plus de petites fonctions
+
+
+AFFICHAGE
+Faire une taille variable en fonction du nombre de hub à afficher !
+Pareil pour x et y

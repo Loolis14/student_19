@@ -1,6 +1,7 @@
 from data_models.graph import Graph
 from data_models import Drone, Hub, Connection
 from srcs.pathfinder import Pathfinder
+from srcs.simulation import Simulation
 # Méthodes utiles : run(), execute_turn(), print_state()
 # (pour gérer l'output console avec les couleurs demandées).
 
@@ -18,7 +19,6 @@ class Engine:
         self.graph: Graph = None
         self.drones_in_mouvement: list[Drone] = []
         self.drones_at_start: list[Drone] = []
-        self.rek: Pathfinder = None
         self.paths: list[dict[str, list[Hub | Connection] | int]] = []
         self.max_flow: int = 0
 
@@ -26,10 +26,6 @@ class Engine:
         graph = Graph()
         graph._graph_init_dict_config(config)
         self.graph = graph
-
-    def _create_pathfinder(self, graph: Graph) -> None:
-        rek = Pathfinder(graph)
-        self.rek = rek
 
     def _add_path_weight(self) -> None:
         for path in self.paths:
@@ -81,7 +77,13 @@ class Engine:
                 drone._wait()
         return drones_moved
 
-    def _run_turns(self) -> None:
+    def _simulation_turn_state(self, simulation: Simulation) -> None:
+        drones_state: list[dict[str, str]] = []
+        for drone in self.graph.drones.values():
+            drones_state.append({drone.id: drone.current_pos.id})
+        simulation.drones_state.append(drones_state)
+
+    def _run_turns(self, simulation: Simulation) -> None:
         self.drones_at_start = [d for d in self.graph.drones.values()]
         self._add_path_weight()
         while self.drones_in_mouvement or self.drones_at_start:
@@ -90,11 +92,12 @@ class Engine:
             drone_moved: list[Drone] = self._drones_in_movement()
             drone_moved += self._drones_at_start()
             for drone in drone_moved:
-                movements_turn.append(f'{drone.id}-{drone.current_hub.id}')
-                if drone.current_hub.id == self.graph.end_name:
+                movements_turn.append(f'{drone.id}-{drone.current_pos.id}')
+                if drone.current_pos.id == self.graph.end_name:
                     if drone in self.drones_in_mouvement:
                         self.drones_in_mouvement.remove(drone)
             self.total_moved += len(drone_moved)
+            self._simulation_turn_state(simulation)
             print(f'Tour {self.turn_total}:', " ".join(movements_turn))
 
     def _stats(self) -> None:
@@ -112,16 +115,17 @@ class Engine:
     def main(self, config: dict) -> None:
         self._create_graph(config)
         if len(self.graph.drones) == 0:
-            print('No drone, no simulation needed.')
+            print('No drone registered, no simulation needed.')
         else:
-            self._create_pathfinder(self.graph)
-            max_flow, paths = self.rek._revisited_edmonds_karp()
+            rek = Pathfinder(self.graph)
+            max_flow, paths = rek._revisited_edmonds_karp()
             if not paths:
                 raise PathError("No connection between "
                                 f"'{self.graph.start_name}'"
                                 f"hub and '{self.graph.end_name}' hub.")
+            simulation = Simulation(self.graph)
             self.max_flow = max_flow
-            print(max_flow)
             self._paths_str_to_obj(paths)
-            self._run_turns()
+            self._run_turns(simulation)
             self._stats()
+            simulation.main()
