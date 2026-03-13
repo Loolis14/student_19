@@ -1,36 +1,7 @@
-input: grap + contraints
-to do : efficient routes to a target location
+!! A FAIRE !!
 
-si situation impossible ?
+- Ajouter le fait de ne pas parcourir tous les chemins si on a que deux drones !
 
-
-Objective:
-move all drones in the fewest possible simulation turns
-
-Drone bouge ensemble
-
-differentes stratégie a implementer
-
-Visual representation
-
-
-
-! A FAIRE !
-
-Parsing : 
-- Vérifier que drones > 0
-- que le start et l'exit sont bien deux sorties différentes !
-
-
-- Ajouter les hub prioritaires dans tous les algo
-
-- Ajouter le fait de ne pas parcourir tous les 
-
-
-Dans drone : progression inutile pour le moment ? 
-
-
-- Edmons fonctionne pour le moment, mais ne prend pas en compte les connections. A voir pour les ajouter.
 
 - remplacer tous les copy par des list en compréhension ?
 

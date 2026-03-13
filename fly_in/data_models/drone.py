@@ -14,6 +14,7 @@ class Drone:
         self.current_pos: Hub = start_hub
         self.path: deque[Hub | Connection] = deque()
         self.turn_drone = 0
+        self.state: list[str] = [self.current_pos.id]
 
     def _add_path(self, path: list[Hub | Connection]) -> None:
         self.path = deque(path)

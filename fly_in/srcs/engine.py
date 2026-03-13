@@ -77,11 +77,11 @@ class Engine:
                 drone._wait()
         return drones_moved
 
-    def _simulation_turn_state(self, simulation: Simulation) -> None:
-        drones_state: list[dict[str, str]] = []
+    def _drones_turn_state(self, simulation: Simulation) -> None:
         for drone in self.graph.drones.values():
-            drones_state.append({drone.id: drone.current_pos.id})
-        simulation.drones_state.append(drones_state)
+            drone.state.append(drone.current_pos.id)
+            if drone.current_pos.__class__.__name__ == 'Connection':
+                simulation.connections_used.append(drone.current_pos)
 
     def _run_turns(self, simulation: Simulation) -> None:
         self.drones_at_start = [d for d in self.graph.drones.values()]
@@ -97,8 +97,9 @@ class Engine:
                     if drone in self.drones_in_mouvement:
                         self.drones_in_mouvement.remove(drone)
             self.total_moved += len(drone_moved)
-            self._simulation_turn_state(simulation)
+            self._drones_turn_state(simulation)
             print(f'Tour {self.turn_total}:', " ".join(movements_turn))
+        simulation.turn_total = self.turn_total
 
     def _stats(self) -> None:
         drones = self.graph.drones
@@ -121,7 +122,7 @@ class Engine:
             max_flow, paths = rek._revisited_edmonds_karp()
             if not paths:
                 raise PathError("No connection between "
-                                f"'{self.graph.start_name}'"
+                                f"'{self.graph.start_name}' "
                                 f"hub and '{self.graph.end_name}' hub.")
             simulation = Simulation(self.graph)
             self.max_flow = max_flow

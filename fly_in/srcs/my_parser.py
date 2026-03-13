@@ -215,6 +215,12 @@ class Parser:
         capacity = Parser._parse_metadata_connection(metadata, co_line.nb)
         self.connection.append((hub_a, hub_b, capacity))
 
+    def _check_unique_start(self) -> None:
+        if self.start_hub['x'] == self.end_hub['x']:
+            if self.start_hub['y'] == self.end_hub['y']:
+                raise ConfigError("The start and end zone have "
+                                  "the same coordinates.")
+
     def main_parsing(self, file: str) -> dict:
         self._file_reader(file)
         if not self.lines:
@@ -231,6 +237,7 @@ class Parser:
         for config_line in self.lines:
             if config_line.key == 'connection':
                 self._parse_connection(config_line)
+        self._check_unique_start()
 
         return {
             'nb_drones': self.nb_drones,

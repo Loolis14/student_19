@@ -15,6 +15,8 @@ class Pathfinder:
     def _build_residual_graph(self) -> dict[str, dict[str, int]]:
         res_cap = {}
         for hub_id, hub in self.hubs.items():
+            if hub.zone_type == 'blocked':
+                continue
             id_in = f'{hub_id}_in'
             id_out = f'{hub_id}_out'
 
@@ -23,11 +25,12 @@ class Pathfinder:
             res_cap.setdefault(id_out, {})[id_in] = 0
 
         for link_id, link in self.connections.items():
+            h1, h2 = list(link.hubs)
+            if h1.zone_type == 'blocked' or h2.zone_type == 'blocked':
+                continue
             c_in, c_out = f"{link_id}_in", f"{link_id}_out"
             res_cap.setdefault(c_in, {})[c_out] = link.max_capacity
             res_cap.setdefault(c_out, {})[c_in] = 0
-
-            h1, h2 = list(link.hubs)
 
             # --- Sens 1 : Hub1 vers Hub2 ---
             # Sortie Hub1 -> Entrée Conn
@@ -106,9 +109,6 @@ class Pathfinder:
             neighbor = "_".join(ngbr_id.split('_')[:-1])
             if self.connections.get(curr) or self.connections.get(curr):
                 return 0
-            """ for c in self.connections:
-                if c.id == curr or c.id == neighbor:
-                    return 0 """
             if "_in" in curr_id and "_out" in ngbr_id and curr == neighbor:
                 zone = self.hubs[curr].zone_type
                 if zone == 'restricted':
