@@ -2,6 +2,7 @@ from drone import Drone
 from hub import Hub
 from connection import Connection
 from collections import deque
+from typing import Optional
 
 
 class Graph:
@@ -31,7 +32,8 @@ class Graph:
         self.start_name: str = ''
         self.end_name: str = ''
 
-    def _add_hub(self, config: dict[str, int | str], type: str) -> None:
+    def _add_hub(self, config: dict[str, Optional[str | int]],
+                 type: str) -> None:
         """
         Creates and registers a new Hub instance in the graph.
 
@@ -40,14 +42,26 @@ class Graph:
                 (name, coordinates, type of zone, max drones and the color).
             type (str): The role of the hub ('start_hub', 'end_hub' or 'hub').
         """
-        hub_id: str = config['name']
-        new_hub: Hub = Hub(config)
-        self.hubs[hub_id] = new_hub
+        raw_x = config.get('x')
+        raw_y = config.get('y')
+        raw_max = config.get('max_drones')
+        x = int(raw_x) if raw_x else 0
+        y = int(raw_y) if raw_y else 0
+        max_drones = int(raw_max) if raw_max else 1
+
+        raw_color = config.get('color')
+        color = str(raw_color) if raw_color else None
+
+        name = str(config.get('name', 'unknown'))
+        zone = str(config.get('zone', 'normal'))
+
+        new_hub: Hub = Hub(name, x, y, zone, color, max_drones)
+        self.hubs[name] = new_hub
         match type:
             case 'start_hub':
-                self.start_name = hub_id
+                self.start_name = name
             case 'end_hub':
-                self.end_name = hub_id
+                self.end_name = name
 
     def _add_drones(self, nb_drones: int) -> None:
         """
@@ -79,12 +93,11 @@ class Graph:
             self.connections[f'C{i}'] = new_connection
             i += 1
 
-    def _graph_init_dict_config(self,
-                                config: dict[
-                                    str, int |
-                                    dict[str, int | str] |
-                                    list[dict[str, int | str]] |
-                                    list[tuple[str, str, int]]]) -> None:
+    def _graph_init(self, config: tuple[int,
+                                        dict[str, Optional[str | int]],
+                                        dict[str, Optional[str | int]],
+                                        list[dict[str, Optional[str | int]]],
+                                        list[tuple[str, str, int]]]) -> None:
         """
         Full graph initialization from a configuration dictionary.
 
@@ -92,14 +105,15 @@ class Graph:
             config (dict[str, Any]): Complete configuration containing hubs,
                 connections, and drone counts.
         """
-        self._add_hub(config['start_hub'], 'start_hub')
-        self._add_hub(config['end_hub'], 'end_hub')
-        for hub in config['hub']:
+        nb_drones, start_hub, end_hub, hubs, connection = config
+        self._add_hub(start_hub, 'start_hub')
+        self._add_hub(end_hub, 'end_hub')
+        for hub in hubs:
             self._add_hub(hub, 'hub')
-        self._add_drones(config['nb_drones'])
-        self._add_connections(config['connection'])
-        self.hubs[self.start_name].max_capacity = config['nb_drones']
-        self.hubs[self.end_name].max_capacity = config['nb_drones']
+        self._add_drones(nb_drones)
+        self._add_connections(connection)
+        self.hubs[self.start_name].max_capacity = nb_drones
+        self.hubs[self.end_name].max_capacity = nb_drones
 
     def _add_path_to_drone(self, path: list[Hub]) -> None:
         """
@@ -126,7 +140,7 @@ class Graph:
             list[Hub | Connection]: A list of objects that the drone will
                 physically traverse.
         """
-        path_in_obj: list[Hub] = []
+        path_in_obj: list[Hub | Connection] = []
         len_path: int = len(path)
         for i in range(0, len_path, 2):
             if path[i] == self.start_name:

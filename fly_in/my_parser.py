@@ -3,13 +3,22 @@ from typing import Optional
 
 
 class ConfigError(Exception):
+    """Exception raised for configuration errors in the parser."""
     pass
 
 
 class Line:
-    """Keep the content and the number of the line."""
+    """Stores the content and the line number of a configuration entry.
+
+    Attributes:
+        nb (int): The line number in the original file.
+        content (str): The raw text content of the line.
+        key (str): The key extracted on the content.
+        value (str): The value associated with the key.
+    """
 
     def __init__(self, nb: int, content: str) -> None:
+        """Initalizes a line object."""
         self.nb: int = nb
         self.content: str = content
         self.key: str = ""
@@ -17,21 +26,38 @@ class Line:
 
 
 class Parser:
-    """Parse the file in a dictionnary."""
+    """Parse a file for the fly in simulation.
+
+    This class reads a text file, validates its structure, and transforms
+    the data into dictionaries and lists usable by the simulator.
+
+    Attributes:
+        lines (list[Line]): Store the Line objects.
+        nb_drones (int): Total number of drones.
+        start_hub (dict): Datas for the starting hub.
+        end_hub (dict): Datas for the destination hub.
+        hub (list[dict]): List of intermediate hubs.
+        connection (list[tuple]): List of connections (hub_a, hub_b, capacity).
+    """
 
     def __init__(self) -> None:
+        """Initalizes a parser file object."""
         self.lines: list[Line] = []
         self.nb_drones: int = 0
-        self.start_hub: str = ""
-        self.end_hub: str = ""
-        self.hub: list[str, str | int] = []
+        self.start_hub: dict[str, Optional[str | int]] = {}
+        self.end_hub: dict[str, Optional[str | int]] = {}
+        self.hub: list[dict[str, Optional[str | int]]] = []
         self.connection: list[tuple[str, str, int]] = []
         self.coord: list[tuple[int, int]] = []
 
     def _file_reader(self, file: str) -> None:
-        """
-        Read the file and create a list of every line.
-        (# and empty line not take in count)
+        """Reads the file and ignores comments and empty lines.
+
+        Args:
+            file (str): Path to the configuration file.
+
+        Raises:
+            ConfigError: If the file is not found.
         """
         try:
             with open(file) as f:
@@ -45,11 +71,13 @@ class Parser:
             raise ConfigError(f"'{file}' file not found.")
 
     def _create_dictionnary(self) -> None:
-        """
-        Create a dictionnary with the data
-        Check if the first line is 'nb_drones'
-        Check if start and end hub are not duplicates
-        Check if the line are correctly formated with ':'
+        """Pre-processes lines to extract key/value pairs.
+
+        Performs initial structure validations (presence of drone count,
+        uniqueness of start/end hubs, and formatting via ':').
+
+        Raises:
+            ConfigError: If the basic file structure is invalid.
         """
         if "nb_drones" not in self.lines[0].content:
             raise ConfigError(f"line {self.lines[0].nb} error. The first "
@@ -73,9 +101,11 @@ class Parser:
                 line.value = content.strip()
 
     def _check_keys_config(self) -> None:
-        """
-        Check if all mandatory keys are present and if
-        something must not be present.
+        """Verifies that all mandatory keys are present and valid.
+
+        Raises:
+            ConfigError: If a mandatory key is missing or
+            an unknown key is found.
         """
         config_keys = {line.key for line in self.lines}
         config_mandatory = {"nb_drones", "start_hub",
@@ -96,8 +126,15 @@ class Parser:
                               f"{','.join(result_printable)}")
 
     def _parse_drones(self, drone_line: Line) -> None:
-        """Create an int which represente the number of drones."""
-        nb_drones = drone_line.value
+        """Parses the number of drones.
+
+        Args:
+            drone_line (Line): The line containing 'nb_drones'.
+
+        Raises:
+            ConfigError: If the value is not a positive integer.
+        """
+        nb_drones: str = drone_line.value
         if nb_drones.isdigit():
             self.nb_drones = int(nb_drones)
         else:
@@ -108,25 +145,41 @@ class Parser:
     def _parse_hub_metadata(metadata: Optional[str],
                             line: Optional[int]) -> dict[str,
                                                          Optional[str | int]]:
+        """Parses optional bracketed metadata for a hub. Zone, color and
+            the maximum drones on the hub can be defined.
+
+        Args:
+            metadata (str, optional): Metadata string.
+            line (int): Line number for error reporting.
+
+        Returns:
+            dict: Parsed metadata with default values for missing fields.
+
+        Raises:
+            ConfigError: If the metadata syntax or values are invalid.
         """
-        Create a tuple with the metadata, if nothing is given,
-        default values are given.
-        """
-        data = {'zone': 'normal',
-                'color': None,
-                'max_drones': 1}
+        data: dict[str, Optional[str | int]] = {
+            'zone': 'normal',
+            'color': None,
+            'max_drones': 1}
 
         if not metadata:
             return data
 
         pattern = re.compile(r"(zone|color|max_drones)=([^ ]+)")
         for match in metadata.split():
-            if not pattern.match(match):
+            line_match = pattern.match(match)
+            if not line_match:
                 raise ConfigError(f"line {line} '{match}' not a valid syntax."
                                   "\nUsage: <zone|color|max_drones>=<value>")
-            key, value = pattern.match(match).groups()
+            groups = line_match.groups()
+            if not groups:
+                raise ConfigError(f"line {line} '{match}' not a valid syntax."
+                                  "\nUsage: <zone|color|max_drones>=<value>")
+            key, value = groups
             if key == 'zone':
-                zone_type = ['blocked', 'normal', 'restricted', 'priority']
+                zone_type: list[str] = ['blocked', 'normal',
+                                        'restricted', 'priority']
                 if value not in zone_type:
                     raise ConfigError(f"line {line} '{value}' not valid.\n"
                                       "Zone types must be one of: normal, "
@@ -146,7 +199,14 @@ class Parser:
         return data
 
     def _parse_hub(self, hub_config: Line) -> None:
-        """Parse the configuration on hub line."""
+        """Extracts coordinates and metadata for a hub.
+
+        Args:
+            hub_config (Line): A line of type 'hub', 'start_hub', or 'end_hub'.
+
+        Raises:
+            ConfigError: If the 'Name X Y [metadata]' format is not respected.
+        """
         pattern = re.compile(r"^([^- ]+) (-?\d+) (-?\d+)(?: \[([^\]]+)\])?$")
         match = pattern.match(hub_config.value)
         if not match:
@@ -161,8 +221,8 @@ class Parser:
         if (x, y) in self.coord:
             raise ConfigError(f"line {hub_config.nb} coordinates {x, y}."
                               "There is already a hub with these coordinates.")
-        self.coord.append((x, y))
-        dict_config: dict[str, str | int] = {
+        self.coord.append((int(x), int(y)))
+        dict_config: dict[str, Optional[str | int]] = {
             'name': name,
             'x': int(x),
             'y': int(y)
@@ -177,6 +237,18 @@ class Parser:
 
     @staticmethod
     def _parse_metadata_connection(metadata: Optional[str], line: int) -> int:
+        """Parses the maximum capacity of a connection.
+
+        Args:
+            metadata (str, optional): Configure the max link capacity.
+            line (int): Line number.
+
+        Returns:
+            int: The parsed max link capacity or 1 by default.
+
+        Raises:
+            ConfigError: If the syntax or value is incorrect.
+        """
         if not metadata:
             return 1
 
@@ -193,8 +265,17 @@ class Parser:
         return int(value)
 
     def _parse_connection(self, co_line: Line) -> None:
-        """Parse connection line."""
-        hub_names = [hub['name'] for hub in self.hub]
+        """Parses a link between two hubs.
+
+        Args:
+            co_line (Line): Line defining a connection.
+
+        Raises:
+            ConfigError: If hubs do not exist or
+            if the connection is a duplicate.
+        """
+        hub_names: list[Optional[str | int]] = [hub['name']
+                                                for hub in self.hub]
         hub_names.append(self.start_hub['name'])
         hub_names.append(self.end_hub['name'])
         pattern = re.compile(r"^([^ -]+)-([^ -]+)(?: \[([^\]]+)\])?$")
@@ -213,8 +294,7 @@ class Parser:
             raise ConfigError(f"line {co_line.nb} '{hub_b}' "
                               "not a registered hub name.")
 
-        for tuple in self.connection:
-            hub1, hub2, data = tuple
+        for hub1, hub2, data in self.connection:
             if not ({hub1, hub2} - {hub_a, hub_b}):
                 raise ConfigError(f"line {co_line.nb} '{hub_a}-{hub_b}' "
                                   "connection appear more than once.")
@@ -222,15 +302,36 @@ class Parser:
         self.connection.append((hub_a, hub_b, capacity))
 
     def _check_unique_start(self) -> None:
+        """Verifies that the start and end hubs are
+        not at the same coordinates.
+
+        Raises:
+            ConfigError: If start_hub and end_hub
+            share the same (X, Y) coordinates.
+        """
         if self.start_hub['x'] == self.end_hub['x']:
             if self.start_hub['y'] == self.end_hub['y']:
                 raise ConfigError("The start and end zone have "
                                   "the same coordinates.")
 
-    def main_parsing(self, file: str) -> dict[str, int |
-                                              dict[str, int | str] |
-                                              list[dict[str, int | str]] |
-                                              list[tuple[str, str, int]]]:
+    def main_parsing(self, file: str) -> tuple[int,
+                                               dict[str, Optional[str | int]],
+                                               dict[str, Optional[str | int]],
+                                               list[dict[str,
+                                                         Optional[str | int]]],
+                                               list[tuple[str, str, int]]]:
+        """Executes the full parsing pipeline for the file.
+
+        Args:
+            file (str): Path to the configuration file.
+
+        Returns:
+            dict: A dictionary containing 'nb_drones', 'start_hub', 'end_hub',
+                'hub' (list), and 'connection' (list).
+
+        Raises:
+            ConfigError: If an error occurs at any stage of parsing.
+        """
         self._file_reader(file)
         if not self.lines:
             raise ConfigError("Empty configuration file.")
@@ -248,10 +349,5 @@ class Parser:
                 self._parse_connection(config_line)
         self._check_unique_start()
 
-        return {
-            'nb_drones': self.nb_drones,
-            'start_hub': self.start_hub,
-            'end_hub': self.end_hub,
-            'hub': self.hub,
-            'connection': self.connection,
-        }
+        return (self.nb_drones, self.start_hub, self.end_hub, self.hub,
+                self.connection)

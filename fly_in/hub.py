@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from drone import Drone
     from connection import Connection
+from typing import Optional
 
 
 class Hub:
@@ -24,7 +25,8 @@ class Hub:
             the hub, indexed by their ID.
     """
 
-    def __init__(self, dict: dict[str, int | str]) -> None:
+    def __init__(self, id: str, x: int, y: int, zone: str,
+                 color: Optional[str], max_drones: int) -> None:
         """
         Initializes a new Hub instance using a data dictionary.
 
@@ -32,11 +34,11 @@ class Hub:
             data (dict[str, int | str]): Dictionary containing
                 hub configuration informations.
         """
-        self.id: str = dict['name']
-        self.coord: tuple[int] = (dict['x'], dict['y'])
-        self.zone_type: str = dict['zone']
-        self.color: str = dict['color']
-        self.max_capacity: int = dict['max_drones']
+        self.id: str = id
+        self.coord: tuple[int, int] = (x, y)
+        self.zone_type: str = zone
+        self.color: str | None = color
+        self.max_capacity: int = max_drones
         self.current_drones: dict[str, Drone] = {}
 
     def _get_neighbors(self, connections: list[Connection]) -> list[Hub]:

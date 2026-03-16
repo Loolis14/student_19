@@ -79,7 +79,7 @@ class Drone:
         the turn counter.
         """
         destination: Hub | Connection = self.path.popleft()
-        self.current_pos.current_drones.pop(self.current_pos.id, None)
-        destination.current_drones[destination.id] = destination
+        self.current_pos.current_drones.pop(self.id, None)
+        destination.current_drones[self.id] = self
         self.current_pos = destination
         self.turn_drone += 1

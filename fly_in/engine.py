@@ -4,6 +4,7 @@ from hub import Hub
 from connection import Connection
 from pathfinder import Pathfinder
 from simulation import Simulation
+from typing import Optional
 
 
 class PathError(Exception):
@@ -22,12 +23,13 @@ class Engine:
         self.paths: list[dict[str, list[Hub | Connection] | int]] = []
         self.max_flow: int = 0
 
-    def _create_graph(self, config: dict[str, int |
-                                         dict[str, int | str] |
-                                         list[dict[str, int | str]] |
-                                         list[tuple[str, str, int]]]) -> None:
+    def _create_graph(self, config: tuple[int,
+                                          dict[str, Optional[str | int]],
+                                          dict[str, Optional[str | int]],
+                                          list[dict[str, Optional[str | int]]],
+                                          list[tuple[str, str, int]]]) -> None:
         graph = Graph()
-        graph._graph_init_dict_config(config)
+        graph._graph_init(config)
         self.graph = graph
 
     def _add_path_weight(self) -> None:
@@ -116,10 +118,11 @@ class Engine:
         print(f'Average number of turns per drone: {average:.2f}')
         print('Total path cost:', self.total_path_cost)
 
-    def main(self, config: dict[str, int |
-                                dict[str, int | str] |
-                                list[dict[str, int | str]] |
-                                list[tuple[str, str, int]]]) -> None:
+    def main(self, config: tuple[int,
+                                 dict[str, Optional[str | int]],
+                                 dict[str, Optional[str | int]],
+                                 list[dict[str, Optional[str | int]]],
+                                 list[tuple[str, str, int]]]) -> None:
         self._create_graph(config)
         if len(self.graph.drones) == 0:
             print('No drone registered, no simulation needed.')
