@@ -10,3 +10,8 @@
 # macOS / Windows metadata
 .DS_Store
 *Zone.Identifier
+
+# pyproject artefact
+build/
+dist/
+*.egg-info/

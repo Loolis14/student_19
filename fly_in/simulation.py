@@ -1,16 +1,20 @@
 import tkinter as tk
 from collections import Counter
 try:
-    import matplotlib as mtpl
-    import matplotlib.pyplot as plt
     from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
     from matplotlib.figure import Figure
-    from matplotlib.patches import ConnectionPatch
+    from matplotlib.lines import Line2D
+    from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+    import matplotlib.image as mpimg
+    from PIL import Image, ImageTk
     import numpy as np
 except ImportError:
-    print("Matplotlib not installed.\nRun:")
-    print("pip install matplotlib")
-from data_models import Graph, Connection, Hub, Drone
+    print("A dependency is missing.\nRun:")
+    print("make install")
+from graph import Graph
+from connection import Connection
+from hub import Hub
+from drone import Drone
 
 
 class Simulation:
@@ -20,13 +24,14 @@ class Simulation:
         self.start_name: str = ''
         self.end_name: str = ''
         self.hubs: dict[str, Hub] = graph.hubs
-        self.connections_used: list = []
+        self.connections_used: list[Connection] = []
 
         self.turn_total: int = 0
         self.current_turn: int = 0
         self.turn_entry: int = 0
         self.drone_scatter = None
-        self.drone__nbr_labels: list[int] = []
+        self.drone_images: list = []
+        self.drone_nbr_labels: list[int] = []
         self.is_playing = False
         self.after_id = None
         self.selection = None
@@ -34,7 +39,6 @@ class Simulation:
         self.root = None
         self.canvas: FigureCanvasTkAgg = None
         self.ax = self.fig.add_subplot(111)
-        self.ax.set_aspect('equal')  # Pour que les ronds restent des ronds
 
     def _draw_map(self) -> None:
         for hub_id, hub in self.hubs.items():
@@ -52,7 +56,7 @@ class Simulation:
                          color='white', alpha=1, zorder=2)
             self.ax.plot(x, y, marker=marker_style, markersize=50,
                          color=hub.color, alpha=0.7, zorder=3)
-            self.ax.text(x, y - 0.40, hub_id, fontsize=8, ha='center')
+            self.ax.text(x, y - 0.30, hub_id, fontsize=7, ha='center')
 
         for co_id, co in self.connections.items():
             hub_a, hub_b = co.hubs
@@ -66,24 +70,54 @@ class Simulation:
                              linestyle=':', linewidth=1, zorder=1)
                 x = (hub_a.coord[0] + hub_b.coord[0]) / 2
                 y = (hub_a.coord[1] + hub_b.coord[1]) / 2
-                self.ax.text(x + 0.05, y + 0.05, co_id,
+                self.ax.text(x, y - 0.15, co_id,
                              fontsize=8, ha='center')
 
-        x_max = max(self.hubs.values(), key=lambda h: h.coord[0])
-        y_max = max(self.hubs.values(), key=lambda h: h.coord[1])
-        x_min = min(self.hubs.values(), key=lambda h: h.coord[0])
-        y_min = min(self.hubs.values(), key=lambda h: h.coord[1])
+        self.ax.set_axis_off()
+        x_max: Hub = max(self.hubs.values(), key=lambda h: h.coord[0])
+        y_max: Hub = max(self.hubs.values(), key=lambda h: h.coord[1])
+        x_min: Hub = min(self.hubs.values(), key=lambda h: h.coord[0])
+        y_min: Hub = min(self.hubs.values(), key=lambda h: h.coord[1])
         self.ax.set_xlim(x_min.coord[0]-0.5, x_max.coord[0] + 0.5)
         self.ax.set_ylim(y_min.coord[1]-0.5, y_max.coord[1] + 0.5)
+        self.fig.subplots_adjust(left=0.05, bottom=0.15, right=0.95, top=0.95)
+
+    def _add_caption(self) -> None:
+        legend_elements: list[Line2D] = [
+            Line2D([0], [0], marker='o', color='w', label='Normal Zone',
+                   markerfacecolor='gray', markersize=10),
+            Line2D([0], [0], marker='s', color='w', label='Priority Zone',
+                   markerfacecolor='gray', markersize=10),
+            Line2D([0], [0], marker='^', color='w', label='Restricted Zone',
+                   markerfacecolor='gray', markersize=10),
+            Line2D([0], [0], marker='X', color='w', label='Blocked Zone',
+                   markerfacecolor='gray', markersize=10),
+            Line2D([0], [0], color='gray', linestyle='-', linewidth=1,
+                   label='Standard Connection'),
+            Line2D([0], [0], color='gray', linestyle=':', linewidth=2,
+                   label='Connection occupied one turn during transit'),
+        ]
+
+        self.ax.legend(
+            handles=legend_elements,
+            loc='upper center',
+            bbox_to_anchor=(0.5, -0.05),
+            ncol=3,
+            fontsize=8,
+            frameon=False)
 
     def _update_drones(self) -> None:
         """Update drones positions."""
-        for txt in self.drone__nbr_labels:
+        imagebox = OffsetImage(self.img, zoom=0.04)
+        for txt in self.drone_nbr_labels:
             txt.remove()
-        self.drone__nbr_labels.clear()
+        self.drone_nbr_labels.clear()
+        for artist in self.ax.artists:
+            if isinstance(artist, AnnotationBbox):
+                artist.remove()
 
-        x_s: list = []
-        y_s: list = []
+        x_s: list[int] = []
+        y_s: list[int] = []
         for drone in self.drones:
             pos: str = drone.state[self.current_turn]
             if pos in self.hubs.keys():
@@ -98,20 +132,28 @@ class Simulation:
                 x_s.append(x)
                 y_s.append(y)
         if not self.drone_scatter:
-            self.drone_scatter = self.ax.scatter(x_s, y_s,
-                                                 color='#413c54',
-                                                 marker='o',
-                                                 s=150,
-                                                 zorder=5,
-                                                 picker=2)
+            self.drone_scatter = self.ax.scatter(
+                x_s, y_s,
+                s=400,
+                alpha=0,
+                picker=True,
+                label='_nolegend_',
+                zorder=4)
         else:
             self.drone_scatter.set_offsets(np.c_[x_s, y_s])
-        positions = list(zip(x_s, y_s))
-        count = Counter(positions)
+        positions: list[tuple[int]] = list(zip(x_s, y_s))
+        count: dict[tuple[int, int], int] = Counter(positions)
+        already_done = []
         for (x, y), total in count.items():
+            if (x, y) in already_done:
+                continue
+            ab = AnnotationBbox(imagebox, (x, y), frameon=False)
+            ab.set_picker(True)
+            self.ax.add_artist(ab)
             t = self.ax.text(x, y, str(total), color='white',
-                             va='center', ha='center', zorder=6)
-            self.drone__nbr_labels.append(t)
+                             va='center', ha='center', zorder=7)
+            self.drone_nbr_labels.append(t)
+            already_done.append((x, y))
         self.ax.set_title(f"Turn: {self.current_turn}")
         self.canvas.draw_idle()
 
@@ -120,7 +162,7 @@ class Simulation:
             self.selection.remove()
             self.selection = None
             self.info_label.config(
-                text="Click on drones representation to see details",
+                text="Clic on drones representation to see drones details",
                 fg="#050505"
             )
             if self.canvas:
@@ -160,6 +202,8 @@ class Simulation:
         self._update_drones()
 
     def _on_click(self, event) -> None:
+        """Gère le clic sur les icônes de drones ou dans le vide."""
+        self._remove_selection()
         if not event.xdata or not event.ydata:
             return
         self._remove_selection()
@@ -169,18 +213,31 @@ class Simulation:
             drones: list[str] = []
             for i in drones_i:
                 drones.append(self.drones[i].id)
+                state = self.drones[i].state[self.current_turn]
+                connection: bool = any(
+                    state == c.id for c in self.connections_used)
             self.info_label.config(
                 text=f"Drones on this position: {', '.join(drones)}",
                 fg="#050505"
             )
-            self.selection = self.ax.scatter(
-                [event.xdata], [event.ydata],
-                s=300,
-                facecolors='none',
-                edgecolors='red',
-                linewidths=2,
-                zorder=10
-                )
+            if not connection:
+                self.selection = self.ax.scatter(
+                    [round(event.xdata)], [round(event.ydata)],
+                    s=300,
+                    facecolors='none',
+                    edgecolors='red',
+                    linewidths=2,
+                    zorder=10
+                    )
+            else:
+                self.selection = self.ax.scatter(
+                    [event.xdata], [event.ydata],
+                    s=300,
+                    facecolors='none',
+                    edgecolors='red',
+                    linewidths=2,
+                    zorder=10
+                    )
         else:
             self.info_label.config(
                 text="No drones here. "
@@ -191,15 +248,15 @@ class Simulation:
 
     def _jump_to(self) -> None:
         value = self.turn_entry.get()
-        if not value.isdigit():
-            self.turn_entry.delete(0, tk.END)
-        else:
-            if int(value) > self.turn_total:
-                self.turn_entry.delete(0, tk.END)
-            else:
-                self._remove_selection()
-                self.current_turn = int(value)
-                self._update_drones()
+        if not value.isdigit() or int(value) > self.turn_total:
+            self.turn_entry.config(bg="red")
+            self.turn_entry.after(1000,
+                                  lambda: self.turn_entry.config(bg="#FFFFFF"))
+            return
+        self._remove_selection()
+        self.current_turn = int(value)
+        self.turn_entry.config(bg="#FFFFFF")
+        self._update_drones()
 
     def _interface_control(self):
         self.root.title("Fly-in Simulation")
@@ -208,15 +265,23 @@ class Simulation:
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.root)
         self.fig.tight_layout()
         self._draw_map()
+        self._add_caption()
         self._update_drones()
-        self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+        self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH,
+                                         expand=1, pady=0)
 
         # Informations on click
+        img = Image.open('drone.png').resize((25, 25))
+        icon = ImageTk.PhotoImage(img)
         self.info_label = tk.Label(
             self.root,
             text='Click on drones representation to see details',
-            fg="#000000"
+            image=icon,
+            compound='left',
+            fg="#000000",
+            padx=10
             )
+        self.info_label.image = icon
         self.info_label.pack(side=tk.TOP, fill=tk.X, pady=5)
         self.fig.canvas.mpl_connect('button_press_event', self._on_click)
 
@@ -249,4 +314,5 @@ class Simulation:
 
     def main(self) -> None:
         self.root = tk.Tk()
+        self.img = mpimg.imread('drone.png')
         self._interface_control()

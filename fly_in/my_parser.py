@@ -10,10 +10,10 @@ class Line:
     """Keep the content and the number of the line."""
 
     def __init__(self, nb: int, content: str) -> None:
-        self.nb = nb
-        self.content = content
-        self.key = ""
-        self.value = ""
+        self.nb: int = nb
+        self.content: str = content
+        self.key: str = ""
+        self.value: str = ""
 
 
 class Parser:
@@ -21,11 +21,12 @@ class Parser:
 
     def __init__(self) -> None:
         self.lines: list[Line] = []
-        self.nb_drones = 0
-        self.start_hub = ""
-        self.end_hub = ""
-        self.hub = []
-        self.connection = []
+        self.nb_drones: int = 0
+        self.start_hub: str = ""
+        self.end_hub: str = ""
+        self.hub: list[str, str | int] = []
+        self.connection: list[tuple[str, str, int]] = []
+        self.coord: list[tuple[int, int]] = []
 
     def _file_reader(self, file: str) -> None:
         """
@@ -105,7 +106,8 @@ class Parser:
 
     @staticmethod
     def _parse_hub_metadata(metadata: Optional[str],
-                            line: Optional[int]) -> dict:
+                            line: Optional[int]) -> dict[str,
+                                                         Optional[str | int]]:
         """
         Create a tuple with the metadata, if nothing is given,
         default values are given.
@@ -156,14 +158,18 @@ class Parser:
                               "\nAll metadata is optional and "
                               "enclosed in brackets.")
         name, x, y, metadata = match.groups()
-        dict_config = {
+        if (x, y) in self.coord:
+            raise ConfigError(f"line {hub_config.nb} coordinates {x, y}."
+                              "There is already a hub with these coordinates.")
+        self.coord.append((x, y))
+        dict_config: dict[str, str | int] = {
             'name': name,
             'x': int(x),
             'y': int(y)
             }
         dict_metadata = Parser._parse_hub_metadata(metadata, hub_config.nb)
         dict_config.update(dict_metadata)
-        attr_name = hub_config.key
+        attr_name: str = hub_config.key
         if attr_name == 'hub':
             self.hub.append(dict_config)
         else:
@@ -221,7 +227,10 @@ class Parser:
                 raise ConfigError("The start and end zone have "
                                   "the same coordinates.")
 
-    def main_parsing(self, file: str) -> dict:
+    def main_parsing(self, file: str) -> dict[str, int |
+                                              dict[str, int | str] |
+                                              list[dict[str, int | str]] |
+                                              list[tuple[str, str, int]]]:
         self._file_reader(file)
         if not self.lines:
             raise ConfigError("Empty configuration file.")

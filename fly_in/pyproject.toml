@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fly_in"
+version = "0.1.0"
+dependencies = [
+	"matplotlib==3.8.2",
+	"numpy==1.26.2",
+]
+
+[project.optional-dependencies]
+dev = [
+	"pytest>=8.0.0",
+	"flake8==7.0.0",
+	"mypy==1.9.0",
+]
+
+[tool.setuptools]
+packages = { find = { include = ["srcs*", "data_models*"] } }
+
+[tool.setuptools.package-data]
+"*" = ["*.txt", "*.json"]

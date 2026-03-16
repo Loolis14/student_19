@@ -1,10 +1,12 @@
 """
-main program.
+Main program:
+    - Parse a configuration file
+    - Catch errors
 """
 
 import sys
-from srcs.my_parser import Parser, ConfigError
-from srcs.engine import Engine, PathError
+from my_parser import Parser, ConfigError
+from engine import Engine, PathError
 
 
 if __name__ == "__main__":
@@ -22,6 +24,6 @@ if __name__ == "__main__":
     my_engine = Engine()
     try:
         my_engine.main(config)
-    except (PathError, ImportError) as e:
+    except (PathError, ImportError, ValueError) as e:
         print(e)
         sys.exit(1)

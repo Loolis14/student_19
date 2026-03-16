@@ -1,5 +1,6 @@
-from data_models.graph import Graph
-from data_models import Hub, Connection
+from graph import Graph
+from hub import Hub
+from connection import Connection
 import heapq
 from collections import deque
 
@@ -7,6 +8,7 @@ from collections import deque
 class Pathfinder:
 
     def __init__(self, graph: Graph):
+        self.nb_drones: int = len(graph.drones)
         self.hubs: dict[str, Hub] = graph.hubs
         self.connections: dict[str, Connection] = graph.connections
         self.start_name: str = graph.start_name
@@ -97,20 +99,22 @@ class Pathfinder:
             paths_with_flow.append({'path': temp_path, 'flow': bottleneck})
         return paths_with_flow
 
-    def _revisited_edmonds_karp(self) -> dict:
+    def _revisited_edmonds_karp(self) -> tuple[int,
+                                               list[dict[str,
+                                                         list[str]] | int]]:
         res_cap = self._build_residual_graph()
         initial_cap = {u: dict(v) for u, v in res_cap.items()}
         max_flow = 0
-        parent: dict = {}
+        parent: dict[str, str] = {}
 
         def _get_weight(curr_id: str, ngbr_id: str) -> int:
             """Get the zone weight if a cross in hub is made (in -> out)."""
-            curr = "_".join(curr_id.split('_')[:-1])
-            neighbor = "_".join(ngbr_id.split('_')[:-1])
-            if self.connections.get(curr) or self.connections.get(curr):
+            curr: str = "_".join(curr_id.split('_')[:-1])
+            neighbor: str = "_".join(ngbr_id.split('_')[:-1])
+            if self.connections.get(curr) or self.connections.get(neighbor):
                 return 0
             if "_in" in curr_id and "_out" in ngbr_id and curr == neighbor:
-                zone = self.hubs[curr].zone_type
+                zone: str = self.hubs[curr].zone_type
                 if zone == 'restricted':
                     return 3
                 if zone == 'priority':
@@ -119,9 +123,9 @@ class Pathfinder:
             return 0
 
         def _dijkstra() -> bool:
-            start_hub = f'{self.start_name}_out'
-            queue = [(0, start_hub)]
-            min_costs: dict = {start_hub: 0}
+            start_hub: str = f'{self.start_name}_out'
+            queue: deque[int, str] = [(0, start_hub)]
+            min_costs: dict[str, int] = {start_hub: 0}
             parent.clear()
             while queue:
                 curr_cost, curr_id = heapq.heappop(queue)
@@ -140,13 +144,15 @@ class Pathfinder:
             return False
 
         while _dijkstra():
+            if max_flow >= self.nb_drones:
+                break
             path_flow = float('inf')
-            end = f"{self.end_name}_in"
-            start = f"{self.start_name}_out"
+            end: str = f"{self.end_name}_in"
+            start: str = f"{self.start_name}_out"
 
             current = end
             while current != start:
-                prev = parent[current]
+                prev: str = parent[current]
                 path_flow = min(path_flow, res_cap[prev][current])
                 current = prev
 

@@ -1,7 +1,6 @@
 # File: Makefile
-# Author: ebabun <ebabun@student.42belgium.be>
 # Author: mmeurer <mmeurer@student.42belgium.be>
-# Created: 2026/01/21 17:49:10
+# Created: 2026/03/02 15:00:10
 # Updated: 2026/01/20 16:09:10
 
 PYTHON := python3
@@ -9,7 +8,7 @@ VERSION := $(shell $(PYTHON) -c 'import sys; print(f"{sys.version_info.major}.{s
 VENV := venv
 PYTHON_VENV := $(VENV)/bin/python3
 PIP := $(VENV)/bin/pip
-MAIN := a_maze_ing.py
+MAIN := fly_in.py
 
 GREEN := \033[0;32m
 YELLOW := \033[0;33m
@@ -20,31 +19,41 @@ CONFIG ?= 0*.txt
 help:
 	@echo "Available commands:"
 	@echo "  install              Create venv and install dependencies"
-	@echo "  run                  Run the program with config.txt"
-	@echo "  run CONFIG=file.txt  Run the program with custom config file make run CONFIG=your_config.txt"
+	@echo "  install_dev          Install dev dependencies"
+	@echo "  run                  Run the program with the first 0*.txt"
+	@echo "  run CONFIG=file.txt  Run the program with custom config file 'make run CONFIG=your_config.txt'"
 	@echo "  debug                Run with debugger"
 	@echo "  lint                 Run norm and type checks"
 	@echo "  lint-strict          Run strict norm and type checks"
 	@echo "  clean                Remove cache files"
-	@echo "  fclean               Full clean (remove caches, packages, venv)"
-	@echo "  help                 Show this help message" 
+	@echo "  fclean               Full clean (remove caches, venv)"
+	@echo "  help                 Show this help message"
+
+check_venv:
+	@if [ ! -d "$(VENV)" ]; then \
+		echo "$(YELLOW)Error: Virtual environment not found.$(NC)"; \
+		echo "Please run 'make install' first."; \
+		exit 1; \
+	fi
 
 install:
 	@$(PYTHON) -c 'import sys; v=sys.version_info; print(f"Python {v.major}.{v.minor}"); exit(0 if (v.major, v.minor) >= (3, 10) else 1)' || \
 		(echo "Error: Python 3.10+ required" && exit 1)
 	$(PYTHON) -m venv $(VENV)
 	$(PIP) install --upgrade pip
-	$(PIP) install -r requirements.txt
-# 	unzip mlx-2.2-py3-ubuntu-any.whl -d venv/lib/python$(VERSION)/site-packages/
+	$(PIP) install .
 	@printf "$(GREEN)Setup successfully completed$(NC) ✨\n"
 
-run:
+install_dev: check_venv
+	$(PIP) install -e ".[dev]"
+
+run: check_venv
 	$(PYTHON_VENV) $(MAIN) $(CONFIG)
 
-debug:
+debug: check_venv
 	$(PYTHON_VENV) -m pdb $(MAIN) $(CONFIG)
 
-lint:
+lint: check_venv
 	$(PYTHON_VENV) -m flake8 . --exclude $(VENV) ; \
 	$(PYTHON_VENV) -m mypy . --exclude $(VENV) \
 		--warn-return-any \
@@ -53,7 +62,7 @@ lint:
 		--disallow-untyped-defs \
 		--check-untyped-defs
 
-lint-strict:
+lint-strict: check_venv
 	$(PYTHON_VENV) -m flake8 . --exclude $(VENV) ; \
 	$(PYTHON_VENV) -m mypy . --strict --exclude $(VENV)
 
@@ -63,9 +72,9 @@ clean:
 	@find . -type d -name ".pytest_cache" -exec rm -rf {} +
 	@printf "$(YELLOW)cache files removed$(NC) 🧹\n"
 
-fclean: clean clean-build
+fclean: clean
 	@rm -rf venv/
 	@printf "$(YELLOW)Virtual environement removed$(NC) 🧹\n"
 	
 
-.PHONY: help install run debug lint lint-strict clean fclean
+.PHONY: help check_venv install run debug lint lint-strict clean fclean

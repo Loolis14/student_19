@@ -1,13 +1,9 @@
 !! A FAIRE !!
 
-- Ajouter le fait de ne pas parcourir tous les chemins si on a que deux drones !
-
-
-- remplacer tous les copy par des list en compréhension ?
-
+- flake8
+- mypy
+- docstring pep257 eg Google or Numpy style
 - écrire Edmons-Karp en plus de petites fonctions
+- code propre
 
-
-AFFICHAGE
-Faire une taille variable en fonction du nombre de hub à afficher !
-Pareil pour x et y
+- si deux hubs ont les mêmes coordonnes: erreur

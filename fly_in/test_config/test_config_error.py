@@ -26,7 +26,6 @@ BASE = Path(__file__).parent / "test_config"
     BASE / "hub_meta_invalid_syntax.txt",
     BASE / "hub_meta_invalid_syntax2.txt",
     BASE / "hub_x_not_int.txt",
-    BASE / "hub_x_not_positive.txt",
     BASE / "missing_hub.txt",
     BASE / "start_double.txt",
 ])

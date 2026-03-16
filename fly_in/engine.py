@@ -1,9 +1,9 @@
-from data_models.graph import Graph
-from data_models import Drone, Hub, Connection
-from srcs.pathfinder import Pathfinder
-from srcs.simulation import Simulation
-# Méthodes utiles : run(), execute_turn(), print_state()
-# (pour gérer l'output console avec les couleurs demandées).
+from graph import Graph
+from drone import Drone
+from hub import Hub
+from connection import Connection
+from pathfinder import Pathfinder
+from simulation import Simulation
 
 
 class PathError(Exception):
@@ -22,7 +22,10 @@ class Engine:
         self.paths: list[dict[str, list[Hub | Connection] | int]] = []
         self.max_flow: int = 0
 
-    def _create_graph(self, config: dict) -> None:
+    def _create_graph(self, config: dict[str, int |
+                                         dict[str, int | str] |
+                                         list[dict[str, int | str]] |
+                                         list[tuple[str, str, int]]]) -> None:
         graph = Graph()
         graph._graph_init_dict_config(config)
         self.graph = graph
@@ -88,7 +91,7 @@ class Engine:
         self._add_path_weight()
         while self.drones_in_mouvement or self.drones_at_start:
             self.turn_total += 1
-            movements_turn: list = []
+            movements_turn: list[str] = []
             drone_moved: list[Drone] = self._drones_in_movement()
             drone_moved += self._drones_at_start()
             for drone in drone_moved:
@@ -113,7 +116,10 @@ class Engine:
         print(f'Average number of turns per drone: {average:.2f}')
         print('Total path cost:', self.total_path_cost)
 
-    def main(self, config: dict) -> None:
+    def main(self, config: dict[str, int |
+                                dict[str, int | str] |
+                                list[dict[str, int | str]] |
+                                list[tuple[str, str, int]]]) -> None:
         self._create_graph(config)
         if len(self.graph.drones) == 0:
             print('No drone registered, no simulation needed.')
