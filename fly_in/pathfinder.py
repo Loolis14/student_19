@@ -3,6 +3,8 @@ from hub import Hub
 from connection import Connection
 import heapq
 from collections import deque
+from typing import Optional
+import sys
 
 
 class Pathfinder:
@@ -15,7 +17,7 @@ class Pathfinder:
         self.end_name: str = graph.end_name
 
     def _build_residual_graph(self) -> dict[str, dict[str, int]]:
-        res_cap = {}
+        res_cap: dict[str, dict[str, int]] = {}
         for hub_id, hub in self.hubs.items():
             if hub.zone_type == 'blocked':
                 continue
@@ -53,7 +55,7 @@ class Pathfinder:
     def _extract_paths(self, res_cap: dict[str, dict[str, int]],
                        init_cap: dict[str, dict[str, int]]
                        ) -> list[dict[str, list[str] | int]]:
-        flow_graph = {}
+        flow_graph: dict[str, dict[str, int]] = {}
         for u in res_cap:
             for v in res_cap[u]:
                 if v in init_cap and u in init_cap[v]:
@@ -67,10 +69,10 @@ class Pathfinder:
         t: str = f"{self.end_name}_in"
 
         while True:
-            queue = deque([(s, float('inf'))])
-            visited = {s: None}
-            found_path = False
-            bottleneck = 0
+            queue: deque[tuple[str, int]] = deque([(s, sys.maxsize)])
+            visited: dict[str, Optional[str]] = {s: None}
+            found_path: bool = False
+            bottleneck: int = 0
 
             while queue:
                 curr, curr_flow = queue.popleft()
@@ -85,26 +87,26 @@ class Pathfinder:
             if not found_path or bottleneck == 0:
                 break
 
-            curr = t
-            temp_path = []
-            while curr:
-                clean_name = "_".join(curr.split('_')[:-1])
+            new_curr: Optional[str] = t
+            temp_path: list[str] = []
+            while new_curr:
+                clean_name = "_".join(new_curr.split('_')[:-1])
                 if not temp_path or temp_path[-1] != clean_name:
                     temp_path.append(clean_name)
-                prev = visited[curr]
+                prev = visited[new_curr]
                 if prev:
-                    flow_graph[prev][curr] -= bottleneck
-                curr = prev
+                    flow_graph[prev][new_curr] -= bottleneck
+                new_curr = prev
             temp_path.reverse()
             paths_with_flow.append({'path': temp_path, 'flow': bottleneck})
         return paths_with_flow
 
     def _revisited_edmonds_karp(self) -> tuple[int,
-                                               list[dict[str,
-                                                         list[str]] | int]]:
+                                               list[dict[str, list[str] |
+                                                         int]]]:
         res_cap = self._build_residual_graph()
         initial_cap = {u: dict(v) for u, v in res_cap.items()}
-        max_flow = 0
+        max_flow: int = 0
         parent: dict[str, str] = {}
 
         def _get_weight(curr_id: str, ngbr_id: str) -> int:
@@ -124,20 +126,20 @@ class Pathfinder:
 
         def _dijkstra() -> bool:
             start_hub: str = f'{self.start_name}_out'
-            queue: deque[int, str] = [(0, start_hub)]
+            queue: list[tuple[int, str]] = [(0, start_hub)]
             min_costs: dict[str, int] = {start_hub: 0}
             parent.clear()
             while queue:
                 curr_cost, curr_id = heapq.heappop(queue)
                 if curr_id == f'{self.end_name}_in':
                     return True
-                if curr_cost > min_costs.get(curr_id, float('inf')):
+                if curr_cost > min_costs.get(curr_id, sys.maxsize):
                     continue
                 for ngbr_id, capacity in res_cap[curr_id].items():
                     if capacity > 0:
                         weight: int = _get_weight(curr_id, ngbr_id)
                         new_cost = curr_cost + weight
-                        if new_cost < min_costs.get(ngbr_id, float('inf')):
+                        if new_cost < min_costs.get(ngbr_id, sys.maxsize):
                             min_costs[ngbr_id] = new_cost
                             parent[ngbr_id] = curr_id
                             heapq.heappush(queue, (new_cost, ngbr_id))
@@ -146,7 +148,7 @@ class Pathfinder:
         while _dijkstra():
             if max_flow >= self.nb_drones:
                 break
-            path_flow = float('inf')
+            path_flow: int = sys.maxsize
             end: str = f"{self.end_name}_in"
             start: str = f"{self.start_name}_out"
 

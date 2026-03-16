@@ -125,7 +125,7 @@ class Graph:
         for drone in self.drones.values():
             drone.path = deque(path)
 
-    def _str_to_obj(self, path: list[str]) -> list[Hub | Connection]:
+    def _str_to_obj(self, path: list[str] | int) -> list[Hub | Connection]:
         """
         Converts a string-based path into a sequence of objects.
 
@@ -141,6 +141,8 @@ class Graph:
                 physically traverse.
         """
         path_in_obj: list[Hub | Connection] = []
+        if isinstance(path, int):
+            return path_in_obj
         len_path: int = len(path)
         for i in range(0, len_path, 2):
             if path[i] == self.start_name:

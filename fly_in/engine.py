@@ -17,7 +17,6 @@ class Engine:
         self.turn_total: int = 0
         self.total_path_cost: int = 0
         self.total_moved: int = 0
-        self.graph: Graph = None
         self.drones_in_mouvement: list[Drone] = []
         self.drones_at_start: list[Drone] = []
         self.paths: list[dict[str, list[Hub | Connection] | int]] = []
@@ -30,7 +29,7 @@ class Engine:
                                           list[tuple[str, str, int]]]) -> None:
         graph = Graph()
         graph._graph_init(config)
-        self.graph = graph
+        self.graph: Graph = graph
 
     def _add_path_weight(self) -> None:
         for path in self.paths:
@@ -40,9 +39,11 @@ class Engine:
                           paths: list[dict[str, list[str] | int]]) -> None:
         """Transform str name in object."""
         for path_dict in paths:
+            new_path: dict[str, list[Hub | Connection] | int] = {}
+            new_path['flow'] = path_dict['flow']
             path_in_hub = self.graph._str_to_obj(path_dict['path'])
-            path_dict['path'] = path_in_hub
-            self.paths.append(path_dict)
+            new_path['path'] = path_in_hub
+            self.paths.append(new_path)
 
     def _drones_in_movement(self) -> list[Drone]:
         drone_moved: list[Drone] = []
