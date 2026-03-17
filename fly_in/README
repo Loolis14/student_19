@@ -1,82 +1,140 @@
 *This project has been created as part of the 42 curriculum by mmeurer*
 
-Description
+# Description
+The objective of this project is to navigate from Zone A to Zone B using the fewest possible turns. Both the zones and the connections between them have maximum capacity constraints that must be respected. Additionally, pathfinding must account for different zone weights:
+- Normal: Requires 1 turn to cross.
+- Priority: Requires 1 turn to cross, but these zones should be favored in the path calculation.
+- Restricted: Requires 2 turns to cross, one in the connection and one in the hub.
+- Blocked: Cannot be crossed.
 
-Instructions
+## ✨ Final User Interface & Core Features ✨
 
-Technical choice
+<p align="center">
+  <img src="animation_640p.gif" width="600">
+</p>
 
-Graphical interface et vision
+[Section Graphical Interface](#user-interface)
 
-Resources:
-pour créer et manipuler les regex: https://regex101.com/
-Dijkstra algo: https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
-https://www.w3schools.com/dsa/dsa_algo_graphs_dijkstra.php
-Dijkstra animation: https://upload.wikimedia.org/wikipedia/commons/2/23/Dijkstras_progress_animation.gif
-heapq: https://docs.python.org/3/library/heapq.html
-Edmonds-Karps explanation and use: https://medium.com/@jamierobertdawson/lem-in-finding-all-the-paths-and-deciding-which-are-worth-it-2503dffb893
-Edmonds-Karps algo: https://www.w3schools.com/dsa/dsa_algo_graphs_edmondskarp.php
+<br>
 
-Edmonds-Karp ne se contente pas de trouver des chemins, il optimise le débit total du graphe.
-1. Le concept : "Pousser" et "Annuler"
+# Instructions
 
-Edmonds-Karp est une implémentation concrète de la méthode de Ford-Fulkerson. L'idée est simple : on cherche un chemin du départ à l'arrivée, on y fait passer autant de drones que possible, puis on cherche un autre chemin.
+### Create a configuration file with 5 mandatory parts.
 
-La magie d'Edmonds-Karp réside dans le Graphe Résiduel et les Arêtes de Retour (back-edges).
-2. Comment ça marche ?
-
-Imaginons que chaque connexion a une capacité (nombre de drones max par tour).
-
-    Trouver un chemin : On utilise un BFS pour trouver le chemin le plus court (en nombre de bonds) entre start et end.
-
-    Calculer le goulot d'étranglement : On regarde la capacité la plus faible sur ce chemin. C'est le flux maximum qu'on peut envoyer d'un coup.
-
-    Mettre à jour le graphe :
-
-        On soustrait ce flux des capacités sur le chemin (on "consomme" la place).
-
-        L'astuce : On crée ou on ajoute ce flux sur une "arête inverse" qui va de l'arrivée vers le départ. Cela permet à l'algorithme de "revenir en arrière" si un futur chemin a besoin de passer par là.
-
-    Recommencer : On répète l'opération jusqu'à ce qu'il n'y ait plus aucun chemin possible dans le graphe résiduel.
-
-	Edmonds-Karp travaille normalement sur les capacités des arêtes (connexions). Pour gérer la capacité des hubs, on utilise une astuce de "Split" : on transforme chaque Hub en deux hubs reliés par une arête dont la capacité est le max_drones du hub.
-
-	
-Il donne :
-
-✔️ un ensemble de chemins augmentants
-✔️ avec un débit (flow) associé
-✔️ qui maximise le flux total
-
-Le back-edge (ou arête de retour), c'est littéralement le bouton "Annuler" de ton algorithme. C'est ce qui transforme un simple chercheur de chemin en un véritable optimiseur de flux.
-
-Sans le back-edge, ton algorithme est "têtu" : une fois qu'il a pris une décision, il ne revient jamais dessus. Avec le back-edge, il devient capable de se dire : "Tiens, si je n'étais pas passé par là tout à l'heure, je pourrais faire passer deux drones de plus maintenant."
+|       Key        | Format                      | Description                       | Constraints |
+| :--------------- | :-------------------------- | :-------------------------------- | :---------- |
+| **`nb_drones`**  | `n` Positive integer        | Defines the number of drones.     | Must be the first line of the file. |
+| **`start_hub`**  | `name` `x` `y` `[metadata]` | Defines the drone departure zone. | Must be unique. The name must contain no spaces or hyphens. x and y must be integers. |
+| **`end_hub`**    | `name` `x` `y` `[metadata]` | Defines the drone arrival zone.   | Must be unique. The name must contain no spaces or hyphens. x and y must be integers. |
+| **`hub`**        | `name` `x` `y` `[metadata]` | Defines all other zones.          | Coordinates and names must be unique. The name must contain no spaces or hyphens. x and y must be integers. |
+| **`connection`** | `hub_a-hub_b`               | Defines links between zones.      | Hubs must be pre-defined. Avoid duplicates (A-B is the same as B-A). |
 
 
-Min-Cost Max-Flow est exactement l’algorithme qu’il te faut.
+#### Metadata requirements
+Defines zone or connection specificities. Each `key=value` must be separated by a space, enclosed in brackets.
+|      Hub Key      | Value                                         | Default | Description                 |
+| :---------------- | :-------------------------------------------- | :------ | :-----------------------    |
+| **`zone=`**       | `normal`, `priority`, `restricted`, `blocked` | normal  | Define the type of the hub  |
+| **`color=`**      | a single word (e.g., `red`, `blue`)           | None    | Define the color of the hub |
+| **`max_drones=`** | positive integer                              | 1       | Define the maximum capacity |
 
-A star: https://rosettacode.org/wiki/A*_search_algorithm
-
-https://en.wikipedia.org/wiki/Minimum-cost_flow_problem
-algo Busacker et Gowen: https://fr.wikipedia.org/wiki/Algorithme_de_Busacker_et_Gowen
-
-heapq: https://docs.python.org/3/library/heapq.html
-
-
-MON ALGO
-Je m'inspire de Edmons Karp pour gérer les flux couplé non à un BFS mais à un Dijkstra pour prendre en compte les couts des hubs et faire une priority queue.
-
-Étape du trajet,Ton nouveau get_weight,Pourquoi ?
-HubA_out -> Conn_in,0,C'est juste un lien logique pour entrer dans le tuyau.
-Conn_in -> Conn_out,0,"La connexion limite le flux, mais le ""temps"" est payé à l'arrivée."
-Conn_out -> HubB_in,0,Lien logique.
-HubB_in -> HubB_out,"1, 2 ou 3",C'est ici que tu payes le coût d'entrée dans la destination.
-https://i.imgur.com/qI842em.png
+|       Connection Key     | Value            | Default | Description                 |
+| :----------------------  | :--------------- | :------:| :-----------------------    |
+| **`max_link_capacity=`** | positive integer | 1       | Define the capacity maximal of the connection |
 
 
-Interface graphique tkinter:
-https://youtu.be/Tg13zZ_srwU?t=87
+### 📦 Environment requirements
+This project requires matplotlib and numpy.
+Before running the program, you need to set up a virtual environment and install the necessary dependencies:
+```bash
+make install
+```
 
+### ▶️ Running the Program
+To run the program using the first 0*.txt file located in the root directory:
+```bash
+make run
+```
+
+To run the program with a specific configuration file:
+```bash
+make run CONFIG=name_of_the_file.txt
+```
+
+<br>
+
+# Technical choices
+## 🔍 Regular Expression
+For this project, the parsing stage required a **very strict data format**, down to the exact symbols and characters.
+To efficiently recognize patterns in the configuration file, I used Python’s built-in regular expression (regex) module.
+Regular expressions are extremely powerful and versatile. They allow both:
+- matching exact patterns
+- extracting repeated or complex structures
+
+I also made extensive use of the `.groups()` method to capture and extract specific parts of matched patterns, which greatly simplified the parsing logic.
+
+## 🧠 Algorithm Design
+Choosing the right algorithm was a crucial part of this project. I spent significant time exploring different approaches before selecting the most suitable one.
+
+### Edmonds–Karp Algorithm
+Since the goal of the program is to route all drones to their destination in the minimum number of turns, I first looked for an algorithm capable of computing a maximum flow while respecting capacity constraints.
+
+The Edmonds–Karp algorithm proved to be a natural choice.
+The core idea is straightforward:
+- Find a path from the source to the destination using BFS.
+- Push as many drones as possible through that path, respecting node and edge capacities
+- Repeat the process with new paths
+
+This approach optimizes the total throughput using a **residual graph** and **back edges**, allowing flow adjustments over time.
+Since here, connections also act as transit zones, they were treated similarly to hubs and split accordingly in the graph model using the **Node Splitting** method.
+
+### Min-Cost Max-Flow
+However, in this project, I also needed to account for weights associated with each zone, not just the number of steps.
+To address this, I combined:
+- the residual graph and back-edge logic from Edmonds–Karp
+- with Dijkstra's algorithm, which uses a priority queue (via [heapqueue](https://docs.python.org/3/library/heapq.html))
+
+![Djikstra Animation](https://upload.wikimedia.org/wikipedia/commons/2/23/Dijkstras_progress_animation.gif)
+
+This resulted in a custom algorithm similar to a Min-Cost Max-Flow approach, where both the flow capacity and the cost (or weight) of each path are taken into account to optimize the overall routing strategy.
+
+**Early exit** <br>
+As a performance optimization, I chose to halt the pathfinding process as soon as the maximum flow meets the number of drones.
+
+<br>
+
+# User Interface
+To provide a clear and interactive overview of the drone logic, the project features a dedicated graphical interface.
+- Tech Stack
+    - GUI Framework: **Tkinter** (Python's built-in library) for window management and user interactions.
+    - Data Visualization: **Matplotlib** for dynamic graph rendering and zone positioning.
+    - Media Processing: **FFmpeg** was used to compress screen recordings into high-quality GIFs for this documentation.
+
+- Key Visual Features
+    - Clutter-Free View: Instead of displaying every individual drone (which would saturate the map), zones display when clicked a counter indicating the total number of drones present.
+    - Interactive Inspection: Users can click on any zone to reveal a detailed list of drones currently stationed there.
+    - Dynamic Paths: Real-time visual updates of drone movements across the network.
+
+<br>
+
+# Resources:
+
+- Regex manipulation: https://regex101.com/
+- Min Cost Max Flow: https://en.wikipedia.org/wiki/Minimum-cost_flow_problem
+- Edmonds-Karp Algorithm:
+<br>
+https://medium.com/@jamierobertdawson/lem-in-finding-all-the-paths-and-deciding-which-are-worth-it-2503dffb893
+<br>
+https://www.w3schools.com/dsa/dsa_algo_graphs_edmondskarp.php
+- Dijkstra algorithm: 
+<br>
+https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm 
+<br>
+https://www.w3schools.com/dsa/dsa_algo_graphs_dijkstra.ph
+- Heapq: https://docs.python.org/3/library/heapq.html
+- Graphical interface Tkinter: https://youtu.be/Tg13zZ_srwU?t=87
+- Matplotlib:
+<br>
+https://matplotlib.org/ 
+<br>
 https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.plot.html#matplotlib.axes.Axes.plot
-
-https://matplotlib.org/
