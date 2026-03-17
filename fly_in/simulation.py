@@ -6,6 +6,9 @@ try:
     from matplotlib.lines import Line2D
     from matplotlib.offsetbox import OffsetImage, AnnotationBbox
     import matplotlib.image as mpimg
+    from matplotlib.text import Text
+    from matplotlib.collections import PathCollection
+    from matplotlib.backend_bases import MouseEvent
     from PIL import Image, ImageTk
     import numpy as np
 except ImportError:
@@ -15,6 +18,7 @@ from graph import Graph
 from connection import Connection
 from hub import Hub
 from drone import Drone
+from typing import Optional
 
 
 class Simulation:
@@ -24,20 +28,19 @@ class Simulation:
         self.start_name: str = ''
         self.end_name: str = ''
         self.hubs: dict[str, Hub] = graph.hubs
-        self.connections_used: list[Connection] = []
+        self.connections_used: list[Connection | Hub] = []
 
         self.turn_total: int = 0
         self.current_turn: int = 0
-        self.turn_entry: int = 0
-        self.drone_scatter = None
-        self.drone_images: list = []
-        self.drone_nbr_labels: list[int] = []
-        self.is_playing = False
-        self.after_id = None
-        self.selection = None
+        self.turn_entry: tk.Entry
+        self.drone_scatter: Optional[PathCollection] = None
+        self.drone_nbr_labels: list[Text] = []
+        self.is_playing: bool = False
+        self.after_id: str = ""
+        self.selection: Optional[PathCollection] = None
         self.fig = Figure(figsize=(6, 6))
-        self.root = None
-        self.canvas: FigureCanvasTkAgg = None
+        self.root = tk.Tk()
+        self.img = mpimg.imread('drone.png')
         self.ax = self.fig.add_subplot(111)
 
     def _draw_map(self) -> None:
@@ -68,9 +71,9 @@ class Simulation:
             else:
                 self.ax.plot(x_coords, y_coords, color='gray', alpha=0.9,
                              linestyle=':', linewidth=1, zorder=1)
-                x = (hub_a.coord[0] + hub_b.coord[0]) / 2
-                y = (hub_a.coord[1] + hub_b.coord[1]) / 2
-                self.ax.text(x, y - 0.15, co_id,
+                x_h: float = (hub_a.coord[0] + hub_b.coord[0]) / 2
+                y_h: float = (hub_a.coord[1] + hub_b.coord[1]) / 2
+                self.ax.text(x_h, y_h - 0.15, co_id,
                              fontsize=8, ha='center')
 
         self.ax.set_axis_off()
@@ -116,8 +119,8 @@ class Simulation:
             if isinstance(artist, AnnotationBbox):
                 artist.remove()
 
-        x_s: list[int] = []
-        y_s: list[int] = []
+        x_s: list[int | float] = []
+        y_s: list[int | float] = []
         for drone in self.drones:
             pos: str = drone.state[self.current_turn]
             if pos in self.hubs.keys():
@@ -141,8 +144,8 @@ class Simulation:
                 zorder=4)
         else:
             self.drone_scatter.set_offsets(np.c_[x_s, y_s])
-        positions: list[tuple[int]] = list(zip(x_s, y_s))
-        count: dict[tuple[int, int], int] = Counter(positions)
+        positions: list[tuple[int | float, int | float]] = list(zip(x_s, y_s))
+        count: Counter[tuple[int | float, int | float]] = Counter(positions)
         already_done = []
         for (x, y), total in count.items():
             if (x, y) in already_done:
@@ -150,15 +153,15 @@ class Simulation:
             ab = AnnotationBbox(imagebox, (x, y), frameon=False)
             ab.set_picker(True)
             self.ax.add_artist(ab)
-            t = self.ax.text(x, y, str(total), color='white',
-                             va='center', ha='center', zorder=7)
+            t: Text = self.ax.text(x, y, str(total), color='white',
+                                   va='center', ha='center', zorder=7)
             self.drone_nbr_labels.append(t)
             already_done.append((x, y))
         self.ax.set_title(f"Turn: {self.current_turn}")
         self.canvas.draw_idle()
 
     def _remove_selection(self) -> None:
-        if self.selection:
+        if self.selection is not None:
             self.selection.remove()
             self.selection = None
             self.info_label.config(
@@ -201,12 +204,14 @@ class Simulation:
         self.current_turn = 0
         self._update_drones()
 
-    def _on_click(self, event) -> None:
+    def _on_click(self, event: MouseEvent) -> None:
         """Gère le clic sur les icônes de drones ou dans le vide."""
         self._remove_selection()
-        if not event.xdata or not event.ydata:
+        if event.xdata is None or event.ydata is None:
             return
         self._remove_selection()
+        if self.drone_scatter is None:
+            return
         cont, ind = self.drone_scatter.contains(event)
         if cont:
             drones_i = ind['ind']
@@ -258,7 +263,11 @@ class Simulation:
         self.turn_entry.config(bg="#FFFFFF")
         self._update_drones()
 
-    def _interface_control(self):
+    def _on_click_wrapper(self, event: object) -> None:
+        if isinstance(event, MouseEvent):
+            self._on_click(event)
+
+    def interface_control(self) -> None:
         self.root.title("Fly-in Simulation")
 
         # Graphique part
@@ -273,17 +282,18 @@ class Simulation:
         # Informations on click
         img = Image.open('drone.png').resize((25, 25))
         icon = ImageTk.PhotoImage(img)
-        self.info_label = tk.Label(
+        self.info_label: tk.Label = tk.Label(
             self.root,
             text='Click on drones representation to see details',
-            image=icon,
+            image=icon,  # type: ignore[arg-type]
             compound='left',
             fg="#000000",
-            padx=10
+            padx=10,
             )
-        self.info_label.image = icon
+        setattr(self.info_label, "image", icon)
         self.info_label.pack(side=tk.TOP, fill=tk.X, pady=5)
-        self.fig.canvas.mpl_connect('button_press_event', self._on_click)
+        self.fig.canvas.mpl_connect('button_press_event',
+                                    self._on_click_wrapper)
 
         # Toolbar
         toolbar = tk.Frame(self.root, bg="#c6c5cc")
@@ -311,8 +321,3 @@ class Simulation:
                  text=f'(max {self.turn_total})').pack(side=tk.LEFT, padx=2)
 
         self.root.mainloop()
-
-    def main(self) -> None:
-        self.root = tk.Tk()
-        self.img = mpimg.imread('drone.png')
-        self._interface_control()

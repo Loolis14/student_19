@@ -37,10 +37,8 @@ class Pathfinder:
             res_cap.setdefault(c_out, {})[c_in] = 0
 
             # --- Sens 1 : Hub1 vers Hub2 ---
-            # Sortie Hub1 -> Entrée Conn
             res_cap.setdefault(f"{h1.id}_out", {})[c_in] = link.max_capacity
             res_cap.setdefault(c_in, {})[f"{h1.id}_out"] = 0
-            # Sortie Conn -> Entrée Hub2
             res_cap.setdefault(c_out, {})[f"{h2.id}_in"] = link.max_capacity
             res_cap.setdefault(f"{h2.id}_in", {})[c_out] = 0
 
@@ -54,7 +52,7 @@ class Pathfinder:
 
     def _extract_paths(self, res_cap: dict[str, dict[str, int]],
                        init_cap: dict[str, dict[str, int]]
-                       ) -> list[dict[str, list[str] | int]]:
+                       ) -> list[tuple[list[str], int]]:
         flow_graph: dict[str, dict[str, int]] = {}
         for u in res_cap:
             for v in res_cap[u]:
@@ -64,7 +62,7 @@ class Pathfinder:
                         if flow_sent > 0:
                             flow_graph.setdefault(v, {})[u] = flow_sent
 
-        paths_with_flow: list[dict[str, list[str] | int]] = []
+        paths_with_flow: list[tuple[list[str], int]] = []
         s: str = f"{self.start_name}_out"
         t: str = f"{self.end_name}_in"
 
@@ -98,12 +96,11 @@ class Pathfinder:
                     flow_graph[prev][new_curr] -= bottleneck
                 new_curr = prev
             temp_path.reverse()
-            paths_with_flow.append({'path': temp_path, 'flow': bottleneck})
+            paths_with_flow.append((temp_path, bottleneck))
         return paths_with_flow
 
     def _revisited_edmonds_karp(self) -> tuple[int,
-                                               list[dict[str, list[str] |
-                                                         int]]]:
+                                               list[tuple[list[str], int]]]:
         res_cap = self._build_residual_graph()
         initial_cap = {u: dict(v) for u, v in res_cap.items()}
         max_flow: int = 0
@@ -165,5 +162,6 @@ class Pathfinder:
                 res_cap[current][prev] += path_flow
                 current = prev
             max_flow += path_flow
-        paths = self._extract_paths(res_cap, initial_cap)
-        return max_flow, paths
+
+        paths_with_flow = self._extract_paths(res_cap, initial_cap)
+        return max_flow, paths_with_flow
