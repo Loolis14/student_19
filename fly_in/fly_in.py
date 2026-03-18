@@ -1,7 +1,16 @@
-"""
-Main program:
-    - Parse a configuration file
-    - Catch errors
+"""Entry point of the drone network simulation program.
+
+This module orchestrates the full execution pipeline:
+    1. Parse the input configuration file
+    2. Validate data and handle parsing errors
+    3. Run the simulation engine
+    4. Handle runtime and pathfinding errors
+
+Raises:
+    SystemExit: If an error occurs during parsing or execution.
+
+Usage:
+    python main.py <config_file>
 """
 
 import sys
@@ -9,7 +18,16 @@ from my_parser import Parser, ConfigError
 from engine import Engine, PathError
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """Run the drone simulation program.
+
+    Handles:
+        - Argument parsing
+        - Configuration loading
+        - Engine execution
+
+    Exits the program with an appropriate status code on error.
+    """
     if len(sys.argv) == 1:
         print("No network of drones given.")
         sys.exit(0)
@@ -27,3 +45,7 @@ if __name__ == "__main__":
     except (PathError, ImportError, ValueError) as e:
         print(e)
         sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

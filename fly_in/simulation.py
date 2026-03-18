@@ -1,28 +1,54 @@
 import tkinter as tk
 from collections import Counter
-try:
-    from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-    from matplotlib.figure import Figure
-    from matplotlib.lines import Line2D
-    from matplotlib.offsetbox import OffsetImage, AnnotationBbox
-    import matplotlib.image as mpimg
-    from matplotlib.text import Text
-    from matplotlib.collections import PathCollection
-    from matplotlib.backend_bases import MouseEvent
-    from PIL import Image, ImageTk
-    import numpy as np
-except ImportError:
-    print("A dependency is missing.\nRun:")
-    print("make install")
 from graph import Graph
 from connection import Connection
 from hub import Hub
 from drone import Drone
 from typing import Optional
 
+try:
+    from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+    from matplotlib.figure import Figure
+    from matplotlib.lines import Line2D
+    from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+    from matplotlib.text import Text
+    from matplotlib.collections import PathCollection
+    from matplotlib.backend_bases import MouseEvent
+    import matplotlib.image as mpimg
+    from PIL import Image, ImageTk
+    import numpy as np
+except ImportError:
+    print("A dependency is missing.\nRun:")
+    print("make install")
+
 
 class Simulation:
-    def __init__(self, graph: Graph):
+    """Graphical simulation of drones moving across a network.
+
+    This class handles:
+        - Rendering of hubs and connections
+        - Animation of drone movements over time
+        - User interactions (click, navigation, play/pause)
+
+    Attributes:
+        connections (dict[str, Connection]): All connections in the graph.
+        drones (list[Drone]): List of drones in the simulation.
+        hubs (dict[str, Hub]): All hubs in the graph.
+        connections_used (list[Connection | Hub]): Connections used during
+        simulation.
+
+        turn_total (int): Total number of turns in the simulation.
+        current_turn (int): Current turn displayed.
+
+        is_playing (bool): Whether the animation is running.
+    """
+
+    def __init__(self, graph: Graph) -> None:
+        """Initialize the simulation from a graph.
+
+        Args:
+            graph (Graph): Graph containing hubs, connections, and drones.
+        """
         self.connections: dict[str, Connection] = graph.connections
         self.drones: list[Drone] = [d for d in graph.drones.values()]
         self.start_name: str = ''
@@ -44,6 +70,7 @@ class Simulation:
         self.ax = self.fig.add_subplot(111)
 
     def _draw_map(self) -> None:
+        """Draw hubs and connections on the matplotlib canvas."""
         for hub_id, hub in self.hubs.items():
             x, y = hub.coord
             match hub.zone_type:
@@ -86,6 +113,7 @@ class Simulation:
         self.fig.subplots_adjust(left=0.05, bottom=0.15, right=0.95, top=0.95)
 
     def _add_caption(self) -> None:
+        """Add a legend describing hubs and connection types."""
         legend_elements: list[Line2D] = [
             Line2D([0], [0], marker='o', color='w', label='Normal Zone',
                    markerfacecolor='gray', markersize=10),
@@ -110,7 +138,14 @@ class Simulation:
             frameon=False)
 
     def _update_drones(self) -> None:
-        """Update drones positions."""
+        """Update drone positions for the current turn.
+
+        This method:
+            - Computes drone coordinates
+            - Updates scatter plot positions
+            - Displays drone icons and counts at each position
+            - Refreshes the canvas
+        """
         imagebox = OffsetImage(self.img, zoom=0.04)
         for txt in self.drone_nbr_labels:
             txt.remove()
@@ -161,6 +196,10 @@ class Simulation:
         self.canvas.draw_idle()
 
     def _remove_selection(self) -> None:
+        """Remove the current selection highlight from the plot.
+
+        Also resets the information label.
+        """
         if self.selection is not None:
             self.selection.remove()
             self.selection = None
@@ -172,6 +211,10 @@ class Simulation:
                 self.canvas.draw_idle()
 
     def play_pause(self) -> None:
+        """Toggle the simulation animation state.
+
+        Starts or pauses the drone animation.
+        """
         self._remove_selection()
         if self.is_playing:
             self.is_playing = False
@@ -182,30 +225,45 @@ class Simulation:
             self._run_drones_animation()
 
     def _run_drones_animation(self) -> None:
+        """Run the animation loop for drone movements."""
         self._remove_selection()
         if self.is_playing and self.current_turn < self.turn_total:
             self._next_turn()
             self.after_id = self.root.after(500, self._run_drones_animation)
 
     def _prev_turn(self) -> None:
+        """Go back one turn in the simulation."""
         self._remove_selection()
         if self.current_turn > 0:
             self.current_turn -= 1
             self._update_drones()
 
     def _next_turn(self) -> None:
+        """Advance to the next turn in the simulation."""
         self._remove_selection()
         if self.current_turn < self.turn_total:
             self.current_turn += 1
             self._update_drones()
 
     def _reset_simulation(self) -> None:
+        """Reset the simulation to the initial state (turn 0)."""
         self._remove_selection()
         self.current_turn = 0
         self._update_drones()
 
     def _on_click(self, event: MouseEvent) -> None:
-        """Gère le clic sur les icônes de drones ou dans le vide."""
+        """Handle click events on the plot.
+
+        If a drone is clicked:
+            - Displays drone IDs at that position
+            - Highlights the selected position
+
+        Otherwise:
+            - Displays a message indicating no drones are present
+
+        Args:
+            event (MouseEvent): Matplotlib mouse event.
+        """
         self._remove_selection()
         if event.xdata is None or event.ydata is None:
             return
@@ -252,6 +310,10 @@ class Simulation:
         self.canvas.draw_idle()
 
     def _jump_to(self) -> None:
+        """Jump to a specific turn entered by the user.
+
+        Invalid input is highlighted in red.
+        """
         value = self.turn_entry.get()
         if not value.isdigit() or int(value) > self.turn_total:
             self.turn_entry.config(bg="red")
@@ -264,20 +326,42 @@ class Simulation:
         self._update_drones()
 
     def _on_click_wrapper(self, event: object) -> None:
+        """Wrapper to ensure the event is a valid MouseEvent.
+
+        Args:
+            event (object): Event triggered by matplotlib.
+        """
         if isinstance(event, MouseEvent):
             self._on_click(event)
 
     def interface_control(self) -> None:
+        """Initialize and launch the graphical user interface.
+
+        This method sets up:
+            - The matplotlib canvas
+            - Control buttons (play, next, previous, reset)
+            - Turn navigation input
+            - Click interaction handling
+
+        Starts the Tkinter main loop.
+        """
         self.root.title("Fly-in Simulation")
 
         # Graphique part
-        self.canvas = FigureCanvasTkAgg(self.fig, master=self.root)
+        self.canvas = FigureCanvasTkAgg(
+            self.fig,
+            master=self.root)
         self.fig.tight_layout()
         self._draw_map()
         self._add_caption()
         self._update_drones()
-        self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH,
-                                         expand=1, pady=0)
+        widget = self.canvas.get_tk_widget()
+        widget.pack(
+            side=tk.TOP,
+            fill=tk.BOTH,
+            expand=1,
+            pady=0,
+        )
 
         # Informations on click
         img = Image.open('drone.png').resize((25, 25))

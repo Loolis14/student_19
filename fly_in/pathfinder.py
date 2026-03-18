@@ -8,8 +8,30 @@ import sys
 
 
 class Pathfinder:
+    """Compute optimal paths for drones using flow algorithms.
 
-    def __init__(self, graph: Graph):
+    This class implements a variation of the Edmonds-Karp algorithm
+    with weighted nodes to prioritize certain zones.
+
+    It supports:
+        - Capacity constraints on hubs and connections
+        - Zone-based traversal costs
+        - Extraction of actual paths from the computed flow
+
+    Attributes:
+        nb_drones (int): Total number of drones to route.
+        hubs (dict[str, Hub]): All hubs in the graph.
+        connections (dict[str, Connection]): All connections in the graph.
+        start_name (str): Starting hub ID.
+        end_name (str): Destination hub ID.
+    """
+
+    def __init__(self, graph: Graph) -> None:
+        """Initialize the pathfinder with a graph.
+
+        Args:
+            graph (Graph): Graph containing hubs, connections, and drones.
+        """
         self.nb_drones: int = len(graph.drones)
         self.hubs: dict[str, Hub] = graph.hubs
         self.connections: dict[str, Connection] = graph.connections
@@ -17,6 +39,18 @@ class Pathfinder:
         self.end_name: str = graph.end_name
 
     def _build_residual_graph(self) -> dict[str, dict[str, int]]:
+        """Build the residual graph with node splitting.
+
+        Each hub is split into two nodes (in/out) to enforce capacity
+        constraints on nodes. Connections are also modeled with capacities.
+
+        Blocked hubs and connections are ignored.
+
+        Returns:
+            dict[str, dict[str, int]]: Residual capacity graph where:
+                - Keys are node IDs
+                - Values are dicts of neighbor nodes with capacities
+        """
         res_cap: dict[str, dict[str, int]] = {}
         for hub_id, hub in self.hubs.items():
             if hub.zone_type == 'blocked':
@@ -53,6 +87,20 @@ class Pathfinder:
     def _extract_paths(self, res_cap: dict[str, dict[str, int]],
                        init_cap: dict[str, dict[str, int]]
                        ) -> list[tuple[list[str], int]]:
+        """Extract paths and associated flow values from the residual graph.
+
+        This method reconstructs actual paths taken by the flow by analyzing
+        reverse edges in the residual graph.
+
+        Args:
+            res_cap (dict[str, dict[str, int]]): Final residual capacities.
+            init_cap (dict[str, dict[str, int]]): Initial capacities.
+
+        Returns:
+            list[tuple[list[str], int]]: List of (path, flow) where:
+                - path is a list of hub/connection IDs
+                - flow is the number of drones assigned to that path
+        """
         flow_graph: dict[str, dict[str, int]] = {}
         for u in res_cap:
             for v in res_cap[u]:
@@ -101,13 +149,39 @@ class Pathfinder:
 
     def _revisited_edmonds_karp(self) -> tuple[int,
                                                list[tuple[list[str], int]]]:
+        """Compute max flow using a modified Edmonds-Karp algorithm.
+
+        This implementation:
+            - Uses Dijkstra instead of BFS to account for weighted zones
+            - Prioritizes paths through certain hub types
+            - Stops early when all drones are routed
+
+        Returns:
+            tuple[int, list[tuple[list[str], int]]]:
+                - max_flow: Total flow sent (number of drones routed)
+                - paths_with_flow: Extracted paths with assigned flow
+        """
         res_cap = self._build_residual_graph()
         initial_cap = {u: dict(v) for u, v in res_cap.items()}
         max_flow: int = 0
         parent: dict[str, str] = {}
 
         def _get_weight(curr_id: str, ngbr_id: str) -> int:
-            """Get the zone weight if a cross in hub is made (in -> out)."""
+            """Compute traversal cost between two nodes.
+
+            Cost is applied only when crossing a hub (in → out),
+            based on zone type:
+                - priority: low cost
+                - normal: medium cost
+                - restricted: high cost
+
+            Args:
+                curr_id (str): Current node ID.
+                ngbr_id (str): Neighbor node ID.
+
+            Returns:
+                int: Traversal cost.
+            """
             curr: str = "_".join(curr_id.split('_')[:-1])
             neighbor: str = "_".join(ngbr_id.split('_')[:-1])
             if self.connections.get(curr) or self.connections.get(neighbor):
@@ -122,6 +196,18 @@ class Pathfinder:
             return 0
 
         def _dijkstra() -> bool:
+            """Find shortest augmenting path using Dijkstra.
+
+            This method searches for a path from source to sink in the residual
+            graph while minimizing traversal cost.
+
+            Updates:
+                parent (dict[str, str]): Stores the path.
+
+            Returns:
+                bool: True if a path to the destination was found,
+                    False otherwise.
+            """
             start_hub: str = f'{self.start_name}_out'
             queue: list[tuple[int, str]] = [(0, start_hub)]
             min_costs: dict[str, int] = {start_hub: 0}
