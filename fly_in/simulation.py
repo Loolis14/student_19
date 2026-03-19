@@ -5,6 +5,7 @@ from connection import Connection
 from hub import Hub
 from drone import Drone
 from typing import Optional
+import sys
 
 try:
     from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -20,6 +21,7 @@ try:
 except ImportError:
     print("A dependency is missing.\nRun:")
     print("make install")
+    sys.exit(1)
 
 
 class Simulation:
@@ -66,7 +68,7 @@ class Simulation:
         self.selection: Optional[PathCollection] = None
         self.fig = Figure(figsize=(6, 6))
         self.root = tk.Tk()
-        self.img = mpimg.imread('drone.png')
+        self.img = mpimg.imread('assets/drone.png')
         self.ax = self.fig.add_subplot(111)
 
     def _draw_map(self) -> None:
@@ -364,7 +366,7 @@ class Simulation:
         )
 
         # Informations on click
-        img = Image.open('drone.png').resize((25, 25))
+        img = Image.open('assets/drone.png').resize((25, 25))
         icon = ImageTk.PhotoImage(img)
         self.info_label: tk.Label = tk.Label(
             self.root,

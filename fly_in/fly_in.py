@@ -42,7 +42,7 @@ def main() -> None:
     my_engine = Engine()
     try:
         my_engine.main(config)
-    except (PathError, ImportError, ValueError) as e:
+    except (PathError, ImportError, ValueError, NameError) as e:
         print(e)
         sys.exit(1)
 

@@ -28,6 +28,8 @@ BASE = Path(__file__).parent / "test_config"
     BASE / "hub_x_not_int.txt",
     BASE / "missing_hub.txt",
     BASE / "start_double.txt",
+    BASE / "same_coord.txt",
+    BASE / "same_name.txt",
 ])
 def test_invalid_configs(filename):
     p = Parser()

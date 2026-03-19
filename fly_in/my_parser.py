@@ -38,6 +38,8 @@ class Parser:
         end_hub (dict): Datas for the destination hub.
         hub (list[dict]): List of intermediate hubs.
         connection (list[tuple]): List of connections (hub_a, hub_b, capacity).
+        coord (list[tuple[int, int]]): List of all hub coordinates.
+        names (list[str]): list of all hub names.
     """
 
     def __init__(self) -> None:
@@ -49,6 +51,7 @@ class Parser:
         self.hub: list[dict[str, Optional[str | int]]] = []
         self.connection: list[tuple[str, str, int]] = []
         self.coord: list[tuple[int, int]] = []
+        self.names: list[str] = []
 
     def _file_reader(self, file: str) -> None:
         """Reads the file and ignores comments and empty lines.
@@ -218,14 +221,19 @@ class Parser:
                               "\nAll metadata is optional and "
                               "enclosed in brackets.")
         name, x, y, metadata = match.groups()
+        x, y = map(int, (x, y))
         if (x, y) in self.coord:
             raise ConfigError(f"line {hub_config.nb} coordinates {x, y}."
                               "There is already a hub with these coordinates.")
-        self.coord.append((int(x), int(y)))
+        self.coord.append((x, y))
+        if name in self.names:
+            raise ConfigError(f"line {hub_config.nb} name {name}."
+                              "There is already a hub with these name.")
+        self.names.append(name)
         dict_config: dict[str, Optional[str | int]] = {
             'name': name,
-            'x': int(x),
-            'y': int(y)
+            'x': x,
+            'y': y
             }
         dict_metadata = Parser._parse_hub_metadata(metadata, hub_config.nb)
         dict_config.update(dict_metadata)
