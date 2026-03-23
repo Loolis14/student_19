@@ -6,7 +6,7 @@
 /*   By: mmeurer <mmeurer@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/19 21:23:40 by mmeurer           #+#    #+#             */
-/*   Updated: 2026/03/19 22:04:59 by mmeurer          ###   ########.fr       */
+/*   Updated: 2026/03/23 17:20:41 by mmeurer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,19 @@
 
 int	main(int argc, char **argv)
 {
+	ctx	contexte;
 	if (argc != 9)
 	{
 		printf("%s", "Bad number of arguments.\n" USAGE);
 		return 1;
 	}
-	main_parsing(argv + 1);
+	if (!main_parsing(argv + 1, &contexte))
+	{
+		return 1;
+	}
+	printf("%i\n", contexte.scheduler);
+	printf("%i\n", contexte.nb_coders);
+	printf("%u\n", contexte.burnout);
+	printf("%u\n", contexte.compile);
+	printf("%u\n", contexte.compiles_goal);
 }
