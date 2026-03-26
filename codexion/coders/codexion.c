@@ -29,6 +29,7 @@ int	main(int argc, char **argv)
 	{
 		return 1;
 	}
+	create_threads(&contexte);
 	printf("%i\n", contexte.scheduler);
 	printf("%i\n", contexte.nb_coders);
 	printf("%u\n", contexte.burnout);

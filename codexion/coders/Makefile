@@ -14,28 +14,29 @@ NAME:=codexion
 
 # $(addprefix srcs/, push_swap.c) \
 
-SRC:= codexion.c parsing.c
+SRC:= codexion.c parsing.c threads.c utils.c
 OBJ:=$(SRC:.c=.o)
 
 CC:=cc
 CFLAGS:=-Wall -Wextra -Werror
+THREAD=-pthread
 
 all: $(NAME)
 
 $(NAME): $(OBJ)
-	$(CC) $(CFLAGS) $(OBJ) -o $@
+	$(CC) $(CFLAGS) $(THREAD) $(OBJ) -o $@
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c $^ -o $@
+	$(CC) $(CFLAGS) $(THREAD) -c $^ -o $@
 
 norm:
 	norminette $(SRC)
 
 clean:
-	rm --force -- $(OBJ)
+	rm -f -- $(OBJ)
 
 fclean: clean
-	rm --force -- $(NAME)
+	rm -f -- $(NAME)
 
 re: fclean all
 

@@ -15,6 +15,7 @@
 
 #include <unistd.h>
 #include <stdbool.h>
+#include <pthread.h>
 
 typedef enum logique {
 	FIFO,
@@ -33,7 +34,16 @@ typedef struct ctx
 	scheduler		scheduler;
 }	ctx;
 
+typedef struct coder {
+	int			id;
+	pthread_t	thread;
+	useconds_t	last_compile;
+	int			nb_code;
+	ctx			*ctx;
+} coder;
+
 bool	main_parsing(char **args, ctx *context);
+bool create_threads(ctx *ctx);
 
 // utils
 int		ft_len(char *s);
