@@ -22,8 +22,19 @@ typedef enum logique {
 	EDF
 } scheduler;
 
-typedef struct ctx
-{
+typedef struct ctx ctx;
+
+typedef struct coder {
+	int				id;
+	pthread_t		thread;
+	useconds_t		last_compile;
+	int				nb_code;
+	ctx				*ctx;
+	pthread_mutex_t	*left_dongle;
+    pthread_mutex_t	*right_dongle;
+} 	coder;
+
+typedef struct ctx {
 	int				nb_coders;
 	useconds_t		burnout;
 	useconds_t		compile;
@@ -32,18 +43,15 @@ typedef struct ctx
 	int				compiles_goal;
 	useconds_t		dongle_cd;
 	scheduler		scheduler;
+	coder			*coders;
+	pthread_mutex_t	*dongle;
 }	ctx;
 
-typedef struct coder {
-	int			id;
-	pthread_t	thread;
-	useconds_t	last_compile;
-	int			nb_code;
-	ctx			*ctx;
-} coder;
-
 bool	main_parsing(char **args, ctx *context);
-bool create_threads(ctx *ctx);
+bool 	create_coders(ctx *ctx);
+bool    create_dongles(ctx *ctx)
+void 	join_threads(ctx *ctx);
+
 
 // utils
 int		ft_len(char *s);

@@ -4,49 +4,76 @@
 #include <stdlib.h>
 #include <string.h>
 
-void	*collaborative_routine(void *arg)
+
+
+void	*coroutine(void *arg)
 {
     // c'est ici que je gere la routine de chaque philosopher. Mais du coup
-    // ou mettre la gestion
-	coder *coders = (coder *)arg;
+    // ou mettre la gestion ?
+	coder *c = (coder *)arg;
 
-/*     while (1)
+    while (!simulation_stop(c->ctx)) //check les conditions de stop
 	{
-		eat(philo);
-		sleep_philo(philo);
-		think(philo);
+		//compile(c);
+		//debug(c);
+		//refactor(c);
 	}
-	return (NULL); */
 
-    /*write(1, "coder ", 6);
-    write(1, coders->id, strlen(coders->id));
-    write(1, " est lancé\n", 12);*/
-
-	printf("coder %d est lancé\n", coders->id);
+	printf("coder %d est lancé\n", c->id);
 	return (NULL);
 }
 
-bool create_thread()
+void join_threads(ctx *ctx)
 {
-    coder coders;
+    int i;
 
-    coders.id = 1;
-    pthread_create(&coders.thread, NULL, collaborative_routine, &coders);
+    i = 0;
+    while (i < ctx->nb_coders)
+    {
+        pthread_join(ctx->coders[i].thread, NULL);
+        i++;
+    }
+}
+
+bool    create_dongles(ctx *ctx)
+{
+    int i;
+
+    i = 0;
+    ctx->forks = malloc(sizeof(pthread_mutex_t) * ctx->nb_coders);
+    if (!ctx->forks)
+    {
+        return (false);
+    }
+    while (i < ctx->nb_coders)
+    {
+        if (pthread_mutex_init(&ctx->forks[i], NULL) != 0)
+            return (false);
+        i++;
+    }
     return (true);
 }
 
-bool create_threads(ctx *ctx)
+bool    create_coders(ctx *ctx)
 {
-    coder *coders;
+    int  i;
 
-    coders = malloc(sizeof(coder) * ctx->nb_coders);
-
-    for (int i = 0; i < ctx->nb_coders; i++)
+    ctx->coders = malloc(sizeof(coder) * ctx->nb_coders);
+    if (!ctx->coders)
     {
-        coders[i].id = i + 1;
-        coders[i].ctx = ctx;
+        return (false);
+    }
+    i = 0;
+    while (i < ctx->nb_coders)
+    {
+        ctx->coders[i].id = i + 1;
+        ctx->coders[i].ctx = ctx;
 
-        pthread_create(&coders[i].thread, NULL, collaborative_routine, &coders[i]);
+        if (pthread_create(&ctx->coders[i].thread, NULL, coroutine, &ctx->coders[i]) != 0)
+        {
+            return (false);
+        }
+        ++i;
     }
     return (true);
 }

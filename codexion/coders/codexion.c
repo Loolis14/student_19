@@ -29,7 +29,15 @@ int	main(int argc, char **argv)
 	{
 		return 1;
 	}
-	create_threads(&contexte);
+	if (!create_dongles(&contexte))
+	{
+		return 1;
+	}
+	if (!create_threads(&contexte))
+	{
+		return 1;
+	}
+	join_threads(&contexte); //Permet d'attendre que chaque thread est fini
 	printf("%i\n", contexte.scheduler);
 	printf("%i\n", contexte.nb_coders);
 	printf("%u\n", contexte.burnout);

@@ -49,3 +49,32 @@ Hoare semantics (signal-and-wait) and Mesa semantics (signal-and-continue) diffe
 
 condition variable
 Semaphores and condition variables build on top of the mutual exclusion provide by locks and are used for providing synchronized access to shared resources.
+
+The Dining Philosopher Problem is a classic synchronization problem introduced by Edsger Dijkstra in 1965. It illustrates the challenges of resource sharing in concurrent programming, such as deadlock, starvation, and mutual exclusion.
+
+Problem Statement
+
+    K philosophers sit around a circular table.
+    Each philosopher alternates between thinking and eating.
+    There is one chopstick between each philosopher (total K chopsticks).
+    A philosopher must pick up two chopsticks (left and right) to eat.
+    Only one philosopher can use a chopstick at a time.
+
+The challenge: Design a synchronization mechanism so that philosophers can eat without causing deadlock (all waiting forever) or starvation (some never get a chance to eat).
+
+Issues in the Problem
+
+    Deadlock: If every philosopher picks up their left chopstick first, no one can pick up the right one circular wait.
+    Starvation: Some philosophers may never get a chance to eat if others keep eating.
+    Concurrency Control: Must ensure no two adjacent philosophers eat simultaneously.
+
+Semaphore Solution to Dining Philosopher
+
+We use semaphores to manage chopsticks and avoid deadlock.
+Algorithm
+
+    Each chopstick is represented as a binary semaphore (mutex).
+    Philosopher must acquire both left and right semaphores before eating.
+    After eating, the philosopher releases both semaphores.
+
+https://www.geeksforgeeks.org/operating-systems/dining-philosopher-problem-using-semaphores/
