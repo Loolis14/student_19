@@ -4,76 +4,81 @@
 #include <stdlib.h>
 #include <string.h>
 
+bool    simulation_stop(t_ctx *ctx)
+{
+    bool    stop;
 
+    pthread_mutex_lock(&ctx->stop_mutex);
+    stop = ctx->stop;
+    pthread_mutex_unlock(&ctx->stop_mutex);
+
+    return (stop);
+}
+
+void take_dongle(t_dongle *d)
+{
+    pthread_mutex_lock(&d->mutex);
+
+    while (d->available == 0)
+    {
+        pthread_cond_wait(&d->cond, &d->mutex);
+    }
+
+    d->available = 0;
+
+    pthread_mutex_unlock(&d->mutex);
+}
 
 void	*coroutine(void *arg)
 {
-    // c'est ici que je gere la routine de chaque philosopher. Mais du coup
-    // ou mettre la gestion ?
-	coder *c = (coder *)arg;
+	t_coder *c = (t_coder *)arg;
 
     while (!simulation_stop(c->ctx)) //check les conditions de stop
 	{
-		//compile(c);
+		pthread_mutex_lock(&c->last_compile_mutex);
+        c->last_compile = get_time();
+        pthread_mutex_unlock(&c->last_compile_mutex);
+        //compile(c);
 		//debug(c);
 		//refactor(c);
 	}
 
+    pthread_mutex_lock(&ctx->print_mutex);
 	printf("coder %d est lancé\n", c->id);
+    pthread_mutex_unlock(&ctx->print_mutex);
+
 	return (NULL);
 }
 
-void join_threads(ctx *ctx)
+void *monitor_routine(void *arg)
 {
+    t_ctx *ctx = (t_ctx *)arg;
     int i;
 
-    i = 0;
-    while (i < ctx->nb_coders)
+    while (1)
     {
-        pthread_join(ctx->coders[i].thread, NULL);
-        i++;
-    }
-}
-
-bool    create_dongles(ctx *ctx)
-{
-    int i;
-
-    i = 0;
-    ctx->forks = malloc(sizeof(pthread_mutex_t) * ctx->nb_coders);
-    if (!ctx->forks)
-    {
-        return (false);
-    }
-    while (i < ctx->nb_coders)
-    {
-        if (pthread_mutex_init(&ctx->forks[i], NULL) != 0)
-            return (false);
-        i++;
-    }
-    return (true);
-}
-
-bool    create_coders(ctx *ctx)
-{
-    int  i;
-
-    ctx->coders = malloc(sizeof(coder) * ctx->nb_coders);
-    if (!ctx->coders)
-    {
-        return (false);
-    }
-    i = 0;
-    while (i < ctx->nb_coders)
-    {
-        ctx->coders[i].id = i + 1;
-        ctx->coders[i].ctx = ctx;
-
-        if (pthread_create(&ctx->coders[i].thread, NULL, coroutine, &ctx->coders[i]) != 0)
+        i = 0;
+        while (i < ctx->nb_coders)
         {
-            return (false);
+            pthread_mutex_lock(&ctx->coders[i].last_compile_mutex);
+
+            if (get_time() - ctx->coders[i].last_compile > ctx->burnout)
+            {
+                pthread_mutex_unlock(&ctx->coders[i].last_compile_mutex);
+
+                pthread_mutex_lock(&ctx->stop_mutex);
+                ctx->stop = 1;
+                pthread_mutex_unlock(&ctx->stop_mutex);
+                
+                pthread_mutex_lock(&ctx->print_mutex);
+                printf("coder %d est mort 💀\n", ctx->coders[i].id);
+                pthread_mutex_unlock(&ctx->print_mutex);
+                return (NULL);
+            }
+
+            pthread_mutex_unlock(&ctx->coders[i].last_compile_mutex);
+            i++;
         }
-        ++i;
+        usleep(1000);
     }
-    return (true);
 }

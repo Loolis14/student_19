@@ -20,21 +20,22 @@
 typedef enum logique {
 	FIFO,
 	EDF
-} scheduler;
+} t_scheduler;
 
-typedef struct ctx ctx;
+typedef struct t_ctx ctx;
 
-typedef struct coder {
+typedef struct s_coder {
 	int				id;
 	pthread_t		thread;
 	useconds_t		last_compile;
+	pthread_mutex_t last_compile_mutex;
 	int				nb_code;
-	ctx				*ctx;
-	pthread_mutex_t	*left_dongle;
-    pthread_mutex_t	*right_dongle;
-} 	coder;
+	t_ctx			*ctx;
+	t_dongle 		*left_dongle;
+	t_dongle 		*right_dongle;
+} 	t_coder;
 
-typedef struct ctx {
+typedef struct s_ctx {
 	int				nb_coders;
 	useconds_t		burnout;
 	useconds_t		compile;
@@ -42,15 +43,35 @@ typedef struct ctx {
 	useconds_t		refactor;
 	int				compiles_goal;
 	useconds_t		dongle_cd;
-	scheduler		scheduler;
-	coder			*coders;
-	pthread_mutex_t	*dongle;
-}	ctx;
+	t_scheduler		scheduler;
 
-bool	main_parsing(char **args, ctx *context);
-bool 	create_coders(ctx *ctx);
-bool    create_dongles(ctx *ctx)
-void 	join_threads(ctx *ctx);
+	t_coder			*coders;
+	pthread_t 		monitor_thread;
+	bool       		stop;
+	t_dongle		*dongles;
+	pthread_mutex_t stop_mutex;
+	pthread_mutex_t print_mutex;
+}	t_ctx;
+
+typedef struct s_dongle {
+    pthread_mutex_t mutex;
+    pthread_cond_t  cond;
+
+    bool             available;
+    
+    // file d'attente
+    // (FIFO ou priority queue pour EDF)
+
+} t_dongle;
+
+bool	main_parsing(char **args, t_ctx *context);
+
+//initialisation
+bool	init_mutex(t_ctx *ctx);
+bool	create_monitor(&ctx);
+bool 	create_coders(t_ctx *ctx);
+bool    create_dongles(t_ctx *ctx)
+void 	join_threads(t_ctx *ctx);
 
 
 // utils

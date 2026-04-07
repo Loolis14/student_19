@@ -78,3 +78,30 @@ Algorithm
     After eating, the philosopher releases both semaphores.
 
 https://www.geeksforgeeks.org/operating-systems/dining-philosopher-problem-using-semaphores/
+
+💥 Le danger sans mutex
+
+👉 Ces deux actions peuvent arriver en même temps
+
+Exemple :
+
+Thread coder      → écrit last_compile
+Thread monitor    → lit last_compile en même temps
+
+💀 Résultat possible :
+
+valeur corrompue
+valeur partiellement écrite
+lecture incohérente
+
+👉 Ça s’appelle une data race
+
+🎯 Règle ultra importante
+
+👉 Dès que tu as :
+
+une variable partagée
+modifiée + lue
+par plusieurs threads
+
+➡️ 🔒 MUTEX OBLIGATOIRE

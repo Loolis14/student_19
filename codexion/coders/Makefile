@@ -14,7 +14,7 @@ NAME:=codexion
 
 # $(addprefix srcs/, push_swap.c) \
 
-SRC:= codexion.c parsing.c threads.c utils.c
+SRC:= codexion.c parsing.c threads.c utils.c initialization.c
 OBJ:=$(SRC:.c=.o)
 
 CC:=cc

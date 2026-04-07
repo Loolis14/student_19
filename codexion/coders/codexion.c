@@ -19,28 +19,34 @@
 
 int	main(int argc, char **argv)
 {
-	ctx	contexte;
+	t_ctx	context;
+
 	if (argc != 9)
 	{
 		printf("%s", "Bad number of arguments.\n" USAGE);
 		return 1;
 	}
-	if (!main_parsing(argv + 1, &contexte))
+	if (!main_parsing(argv + 1, &context))
 	{
 		return 1;
 	}
-	if (!create_dongles(&contexte))
+	if (!init_mutex(&context))
 	{
 		return 1;
 	}
-	if (!create_threads(&contexte))
+	if (!create_dongles(&context) || !create_threads(&context))
 	{
 		return 1;
 	}
-	join_threads(&contexte); //Permet d'attendre que chaque thread est fini
-	printf("%i\n", contexte.scheduler);
-	printf("%i\n", contexte.nb_coders);
-	printf("%u\n", contexte.burnout);
-	printf("%u\n", contexte.compile);
-	printf("%u\n", contexte.compiles_goal);
+	if (!create_monitor(&context))
+	{
+		return 1;
+	}
+	join_threads(&context); //Permet d'attendre que chaque thread est fini
+	
+	printf("%i\n", context.scheduler);
+	printf("%i\n", context.nb_coders);
+	printf("%u\n", context.burnout);
+	printf("%u\n", context.compile);
+	printf("%u\n", context.compiles_goal);
 }
